@@ -8,8 +8,6 @@ import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleType;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import net.minecraft.particles.IParticleData.IDeserializer;
-
 public class ParticleDataTwoInt implements IParticleData {
 
   @SuppressWarnings("deprecation")
