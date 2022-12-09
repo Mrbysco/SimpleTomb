@@ -17,7 +17,7 @@ archivesBaseName = 'simpletomb'
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 minecraft {
 
-    mappings channel: 'official', version: '1.19'
+    mappings channel: 'official', version: '1.19.3'
     // accessTransformer = file('build/resources/main/META-INF/accesstransformer.cfg')
 
     // Default run configurations.

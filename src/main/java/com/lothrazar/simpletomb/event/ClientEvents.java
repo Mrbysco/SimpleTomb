@@ -11,7 +11,6 @@ import com.lothrazar.simpletomb.particle.ParticleRotatingSmoke;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.player.LocalPlayer;
@@ -22,10 +21,11 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
-import net.minecraftforge.client.event.RenderLevelLastEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.joml.Matrix4f;
 
 @Mod.EventBusSubscriber(modid = ModTomb.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 @OnlyIn(Dist.CLIENT)
@@ -40,20 +40,22 @@ public class ClientEvents {
   }
 
   @SubscribeEvent
-  public void render(RenderLevelLastEvent event) {
-    LocalPlayer player = Minecraft.getInstance().player;
-    if (player != null && player.level != null) {
-      ItemStack stack = player.getMainHandItem();
-      if (stack.getItem() == TombRegistry.GRAVE_KEY.get()) {
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        LocationBlockPos location = TombRegistry.GRAVE_KEY.get().getTombPos(stack);
-        if (location != null && !location.isOrigin() &&
-            location.dim.equalsIgnoreCase(WorldHelper.dimensionToString(player.level)) &&
-            player.level.isInWorldBounds(location.toBlockPos())) {
-          PoseStack poseStack = event.getPoseStack();
-          poseStack.pushPose();
-          createBox(bufferSource, poseStack, location.x, location.y, location.z, 1.0F);
-          poseStack.popPose();
+  public void render(RenderLevelStageEvent event) {
+    if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+      LocalPlayer player = Minecraft.getInstance().player;
+      if (player != null && player.level != null) {
+        ItemStack stack = player.getMainHandItem();
+        if (stack.getItem() == TombRegistry.GRAVE_KEY.get()) {
+          MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+          LocationBlockPos location = TombRegistry.GRAVE_KEY.get().getTombPos(stack);
+          if (location != null && !location.isOrigin() &&
+              location.dim.equalsIgnoreCase(WorldHelper.dimensionToString(player.level)) &&
+              player.level.isInWorldBounds(location.toBlockPos())) {
+            PoseStack poseStack = event.getPoseStack();
+            poseStack.pushPose();
+            createBox(bufferSource, poseStack, location.x, location.y, location.z, 1.0F);
+            poseStack.popPose();
+          }
         }
       }
     }

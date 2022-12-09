@@ -1,9 +1,9 @@
 {
   "parent": "simpletomb:block/plate_grave_normal",
   "textures": {
-    "0": "simpletomb:blocks/white_tombstone",
-    "particle": "simpletomb:blocks/white_tombstone",
+    "0": "simpletomb:block/white_tombstone",
+    "particle": "simpletomb:block/white_tombstone",
     "ground": "block/podzol_top",
-    "grave_plate": "simpletomb:blocks/grave_plate"
+    "grave_plate": "simpletomb:block/grave_plate"
   }
 }

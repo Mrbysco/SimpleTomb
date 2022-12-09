@@ -1,7 +1,7 @@
 {
   "parent": "builtin/generated",
   "textures": {
-    "layer0": "simpletomb:items/grave_key"
+    "layer0": "simpletomb:item/grave_key"
   },
   "display": {
     "thirdperson_righthand": {
