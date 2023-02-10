@@ -2,8 +2,10 @@ package com.lothrazar.simpletomb;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
+import com.lothrazar.PartEnum;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
+import net.minecraftforge.common.ForgeConfigSpec.EnumValue;
 import net.minecraftforge.common.ForgeConfigSpec.IntValue;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
@@ -25,6 +27,7 @@ public class ConfigTomb {
   public static IntValue VSEARCHRANGE;
   public static IntValue HSEARCHRANGE;
   public static BooleanValue KEYOPENONUSE;
+  public static EnumValue<PartEnum> KEEPPARTS;
   static final String WALL = "####################################################################################";
 
   public static void setup(Path path) {
@@ -57,6 +60,8 @@ public class ConfigTomb {
         .defineInRange("search_height", 16, 2, 128);
     HSEARCHRANGE = CFG.comment("\r\nWhen searching for a grave location, this is the maximum range to check")
         .defineInRange("search_range", 8, 2, 128);
+    KEEPPARTS = CFG.comment("\r\nKeep parts of the inventory")
+        .defineEnum("keep_parts", PartEnum.NONE);
     CFG.pop();
     CFG.comment(WALL).push("key");
     KEYGIVEN = CFG.comment("\r\nWhether to give a Grave Key item to the player on death.  Tomb can be opened without they key, but the key will help the player locate the grave")
