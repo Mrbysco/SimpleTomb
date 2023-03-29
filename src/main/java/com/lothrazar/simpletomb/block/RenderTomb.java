@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -155,7 +156,7 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
   private void showString(String content, PoseStack matrixStack, MultiBufferSource iRenderTypeBuffer, Font fontRenderer, int posY, int color, float scale, int light) {
     matrixStack.pushPose();
     matrixStack.scale(scale, scale, scale);
-    fontRenderer.drawInBatch(content, -fontRenderer.width(content) / 2, posY - 30, color, false, matrixStack.last().pose(), iRenderTypeBuffer, false, 0, light);
+    fontRenderer.drawInBatch(content, -fontRenderer.width(content) / 2, posY - 30, color, false, matrixStack.last().pose(), iRenderTypeBuffer, Font.DisplayMode.NORMAL, 0, light);
     matrixStack.popPose();
   }
 
@@ -194,7 +195,7 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
     if (graveModel == ModelTomb.GRAVE_NORMAL || graveModel == ModelTomb.GRAVE_SIMPLE) {
       matrixStack.scale(0.2f, 0.2f, 0.2f);
       ItemStack stack = new ItemStack(isNight ? Blocks.JACK_O_LANTERN : Blocks.PUMPKIN);
-      Minecraft.getInstance().getItemRenderer().render(stack, net.minecraft.client.renderer.block.model.ItemTransforms.TransformType.NONE, false, matrixStack, iRenderTypeBuffer, 15728880,
+      Minecraft.getInstance().getItemRenderer().render(stack, ItemDisplayContext.NONE, false, matrixStack, iRenderTypeBuffer, 15728880,
           net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, Minecraft.getInstance().getItemRenderer().getModel(stack, null, null, 0));
     }
     else {

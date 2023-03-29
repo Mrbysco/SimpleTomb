@@ -53,7 +53,7 @@ public class EntityHelper {
       boolean isElytra = false;
       if (slot == null) {
         if (stack.getItem() instanceof ArmorItem) {
-          slot = ((ArmorItem) stack.getItem()).getSlot();
+          slot = ((ArmorItem) stack.getItem()).getEquipmentSlot();
         }
         else {
           if (!(stack.getItem() instanceof ElytraItem)) {

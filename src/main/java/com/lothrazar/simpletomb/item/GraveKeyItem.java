@@ -31,7 +31,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.IItemHandler;
 
 public class GraveKeyItem extends SwordItem {
@@ -150,7 +150,7 @@ public class GraveKeyItem extends SwordItem {
    * Look for any key that matches this Location and remove that key from player
    */
   public boolean removeKeyForGraveInInventory(Player player, LocationBlockPos graveLoc) {
-    IItemHandler itemHandler = player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).orElse(null);
+    IItemHandler itemHandler = player.getCapability(ForgeCapabilities.ITEM_HANDLER, null).orElse(null);
     if (itemHandler != null) {
       for (int i = 0; i < itemHandler.getSlots(); ++i) {
         ItemStack stack = itemHandler.getStackInSlot(i);

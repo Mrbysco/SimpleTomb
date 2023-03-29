@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import org.apache.logging.log4j.Level;
 import com.lothrazar.simpletomb.ConfigTomb;
 import com.lothrazar.simpletomb.ModTomb;
@@ -46,7 +48,6 @@ import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
 import net.minecraftforge.event.level.ExplosionEvent.Detonate;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
@@ -271,7 +272,7 @@ public class PlayerTombEvents {
       return;
     }
     BlockEntity tile = world.getBlockEntity(spawnPos.toBlockPos());
-    IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null).orElse(null);
+    IItemHandler itemHandler = tile.getCapability(ForgeCapabilities.ITEM_HANDLER, null).orElse(null);
     if (!(tile instanceof BlockEntityTomb)
         || itemHandler == null) {
       //either block failed to place, or tile entity wasnt started somehow
@@ -307,7 +308,7 @@ public class PlayerTombEvents {
           + String.format("(%d, %d, %d) " + spawnPos.dim, spawnPos.x, spawnPos.y, spawnPos.z));
     }
     if (ConfigTomb.TOMBCHAT.get()) {
-      MessageType.MESSAGE_NEW_GRAVE.sendSpecialMessage(player);
+      MessageType.MESSAGE_NEW_GRAVE.sendSpecialMessage(player, String.format("(%d, %d, %d) " + spawnPos.dim, spawnPos.x, spawnPos.y, spawnPos.z));
       MessageType.MESSAGE_JOURNEYMAP.sendSpecialMessage(player, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.dim);
     }
   }
