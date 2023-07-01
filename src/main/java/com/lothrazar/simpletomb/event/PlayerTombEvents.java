@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
 import org.apache.logging.log4j.Level;
 import com.lothrazar.simpletomb.ConfigTomb;
 import com.lothrazar.simpletomb.ModTomb;
@@ -84,6 +85,13 @@ public class PlayerTombEvents {
   @SubscribeEvent(priority = EventPriority.LOWEST)
   public void onDetonate(Detonate event) {
     event.getAffectedBlocks().removeIf(blockPos -> (event.getLevel().getBlockState(blockPos).getBlock() instanceof BlockTomb));
+  }
+
+  @SubscribeEvent(priority = EventPriority.LOWEST)
+  public void onDestroy(LivingDestroyBlockEvent event) {
+    if(event.getState().getBlock() instanceof BlockTomb && !(event.getEntity() instanceof Player)) {
+      event.setCanceled(true);
+    }
   }
 
   @SubscribeEvent(priority = EventPriority.LOWEST)
