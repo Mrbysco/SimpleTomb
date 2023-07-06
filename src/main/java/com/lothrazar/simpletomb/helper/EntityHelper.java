@@ -89,7 +89,7 @@ public class EntityHelper {
   }
 
   public static boolean isValidPlayerMP(@Nullable Entity entity) {
-    return isValidPlayer(entity) && !entity.level.isClientSide;
+    return isValidPlayer(entity) && !entity.level().isClientSide;
   }
 
   public static CompoundTag getPersistentTag(Player player) {

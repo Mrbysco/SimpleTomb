@@ -219,7 +219,7 @@ public class PlayerTombEvents {
       tombstoneTag.putLong("timestamp", System.currentTimeMillis());
       tombstoneTag.put("drops", drops);
       tombstoneTag.put("pos", NbtUtils.writeBlockPos(player.blockPosition()));
-      tombstoneTag.putString("dimension", player.level.dimension().location().toString());
+      tombstoneTag.putString("dimension", player.level().dimension().location().toString());
       UUID pid = player.getUUID();
       tombstoneTag.putString("playerid", pid.toString());
       tombstoneTag.putString("playername", player.getDisplayName().getString());
@@ -236,7 +236,7 @@ public class PlayerTombEvents {
 
   private void placeTombstone(LivingDropsEvent event) {
     ServerPlayer player = (ServerPlayer) event.getEntity();
-    ServerLevel world = player.getLevel();
+    ServerLevel world = player.serverLevel();
     Iterator<ItemEntity> it = event.getDrops().iterator();
     ArrayList<ItemStack> keys = new ArrayList<>();
     while (it.hasNext()) {
@@ -354,7 +354,7 @@ public class PlayerTombEvents {
     int posX = player.blockPosition().getX();
     int posY = player.blockPosition().getY();
     int posZ = player.blockPosition().getZ();
-    return player.level.getEntitiesOfClass(ItemEntity.class, new AABB(
+    return player.level().getEntitiesOfClass(ItemEntity.class, new AABB(
         posX - range,
         posY - range,
         posZ - range,

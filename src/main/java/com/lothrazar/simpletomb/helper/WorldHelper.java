@@ -41,11 +41,11 @@ public class WorldHelper {
     final int xRange = ConfigTomb.HSEARCHRANGE.get();
     final int yRange = ConfigTomb.VSEARCHRANGE.get();
     final int zRange = ConfigTomb.HSEARCHRANGE.get();
-    Level level = player.level;
+    Level level = player.level();
     //   
     //shortcut: if the death position is valid AND solid base. JUST DO THAT dont even search
-    if (isValidPlacement(player.level, initPos)
-        && isValidSolid(player.level, initPos)) {
+    if (isValidPlacement(level, initPos)
+        && isValidSolid(level, initPos)) {
       //      ModTomb.LOGGER.info(" initPos is enough =  " + initPos);
       return new LocationBlockPos(initPos, level);
     }
@@ -132,7 +132,7 @@ public class WorldHelper {
   }
 
   public static boolean isRuleKeepInventory(Player player) {
-    return isRuleKeepInventory(player.level);
+    return isRuleKeepInventory(player.level());
   }
 
   public static boolean isRuleKeepInventory(Level level) {

@@ -43,14 +43,14 @@ public class ClientEvents {
   public void render(RenderLevelStageEvent event) {
     if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
       LocalPlayer player = Minecraft.getInstance().player;
-      if (player != null && player.level != null) {
+      if (player != null && player.level() != null) {
         ItemStack stack = player.getMainHandItem();
         if (stack.getItem() == TombRegistry.GRAVE_KEY.get()) {
           MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
           LocationBlockPos location = TombRegistry.GRAVE_KEY.get().getTombPos(stack);
           if (location != null && !location.isOrigin() &&
-              location.dim.equalsIgnoreCase(WorldHelper.dimensionToString(player.level)) &&
-              player.level.isInWorldBounds(location.toBlockPos())) {
+              location.dim.equalsIgnoreCase(WorldHelper.dimensionToString(player.level())) &&
+              player.level().isInWorldBounds(location.toBlockPos())) {
             PoseStack poseStack = event.getPoseStack();
             poseStack.pushPose();
             createBox(bufferSource, poseStack, location.x, location.y, location.z, 1.0F);

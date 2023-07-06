@@ -30,7 +30,7 @@ public class LocationBlockPos {
   }
 
   public LocationBlockPos(Entity entity) {
-    this(entity.blockPosition(), entity.level);
+    this(entity.blockPosition(), entity.level());
   }
 
   public BlockPos toBlockPos() {

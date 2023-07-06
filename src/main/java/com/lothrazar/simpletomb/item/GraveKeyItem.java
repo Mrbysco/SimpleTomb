@@ -49,11 +49,11 @@ public class GraveKeyItem extends SwordItem {
   }
 
   @Override
-  public void onUsingTick(ItemStack stack, LivingEntity entity, int timeLeft) {
+  public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int count) {
     if (entity instanceof Player player) {
       LocationBlockPos location = this.getTombPos(stack);
       if (location == null || location.isOrigin()
-          || !location.dim.equalsIgnoreCase(WorldHelper.dimensionToString(player.level))) {
+              || !location.dim.equalsIgnoreCase(WorldHelper.dimensionToString(level))) {
         return;
       }
       double distance = location.getDistance(player.blockPosition());
@@ -63,16 +63,16 @@ public class GraveKeyItem extends SwordItem {
       }
       else {
         canTp = (ConfigTomb.TPSURVIVAL.get() > 0 &&
-            distance < ConfigTomb.TPSURVIVAL.get()) || ConfigTomb.TPSURVIVAL.get() == -1;
+                distance < ConfigTomb.TPSURVIVAL.get()) || ConfigTomb.TPSURVIVAL.get() == -1;
         //-1 is magic value for ANY DISTANCE IS OK
       }
       if (canTp) {
-        if (timeLeft <= 1) {
+        if (count <= 1) {
           //teleport happens here
           BlockPos pos = location.toBlockPos();
           player.teleportTo(pos.getX(), pos.getY(), pos.getZ());
         }
-        else if (entity.level.isClientSide) {
+        else if (level.isClientSide) {
           //not done, and can TP
           ClientUtils.produceParticleCasting(entity, p -> !p.isUsingItem());
         }
@@ -94,7 +94,7 @@ public class GraveKeyItem extends SwordItem {
         BlockState state = context.getLevel().getBlockState(pos);
         if (state.getBlock() instanceof BlockTomb) {
           //open me
-          BlockTomb.activatePlayerGrave(player.level, pos, state, player);
+          BlockTomb.activatePlayerGrave(context.getLevel(), pos, state, player);
           return InteractionResult.SUCCESS;
         }
       }

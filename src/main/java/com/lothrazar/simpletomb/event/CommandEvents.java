@@ -94,7 +94,7 @@ public class CommandEvents {
       found.deleteAll();
       MutableComponent msg = Component.translatable("Deleted: " + previous);
       msg.setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD));
-      ctx.getSource().sendSuccess(msg, false);
+      ctx.getSource().sendSuccess(() -> msg, false);
     }
     return 0;
   }
@@ -105,13 +105,13 @@ public class CommandEvents {
       for (int i = 0; i < found.playerGraves.size(); i++) {
         MutableComponent msg = Component.translatable(found.toDisplayString(i));
         msg.setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD));
-        ctx.getSource().sendSuccess(msg, false);
+        ctx.getSource().sendSuccess(() -> msg, false);
       }
     }
     else {
-      MutableComponent msg = Component.translatable("Found: #0");
+      MutableComponent msg = Component.literal("Found: #0");
       msg.setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD));
-      ctx.getSource().sendSuccess(msg, false);
+      ctx.getSource().sendSuccess(() -> msg, false);
     }
     return 0;
   }
@@ -130,7 +130,7 @@ public class CommandEvents {
       PlayerTombEvents.putKeyName(target.getName(), key);
       // key for u
       MutableComponent msg = Component.translatable("Attempting to give the key for tomb [" + index + "] to player " + target.getName() + ":" + target.getId());
-      ctx.getSource().sendSuccess(msg, false);
+      ctx.getSource().sendSuccess(() -> msg, false);
       ServerPlayer user = ctx.getSource().getServer().getPlayerList().getPlayer(target.getId());
       ItemHandlerHelper.giveItemToPlayer(user, key);
     }
@@ -138,8 +138,7 @@ public class CommandEvents {
   }
 
   private int exeRestore(CommandContext<CommandSourceStack> ctx, GameProfile target, int index) throws CommandSyntaxException {
-    MutableComponent msg = Component.translatable("Attempting to restore tomb [" + index + "] for player " + target.getName() + ":" + target.getId());
-    ctx.getSource().sendSuccess(msg, false);
+    ctx.getSource().sendSuccess(() -> Component.translatable("Attempting to restore tomb [" + index + "] for player " + target.getName() + ":" + target.getId()), false);
     PlayerTombRecords found = ModTomb.GLOBAL.findGrave(target.getId());
     if (found != null) {
       CompoundTag grave = found.playerGraves.get(index);
@@ -167,8 +166,7 @@ public class CommandEvents {
           ItemHandlerHelper.insertItemStacked(itemHandler, d.copy(), false);
         }
       }
-      msg = Component.translatable("Restored tomb with at [" + pos + "] in " + dim);
-      ctx.getSource().sendSuccess(msg, false);
+      ctx.getSource().sendSuccess(() -> Component.literal("Restored tomb with at [" + pos + "] in " + dim), false);
     }
     return 0;
   }

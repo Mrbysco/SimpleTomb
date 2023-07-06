@@ -9,7 +9,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MapColor;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -21,10 +21,10 @@ public class TombRegistry {
   public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, ModTomb.MODID);
   public static final DeferredRegister<ParticleType<?>> PARTICLE_TYPES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, ModTomb.MODID);
   //Blocks
-  public static final RegistryObject<BlockTomb> GRAVE_SIMPLE = BLOCKS.register("grave_simple", () -> new BlockTomb(Block.Properties.of(Material.STONE), ModelTomb.GRAVE_SIMPLE));
-  public static final RegistryObject<BlockTomb> GRAVE_NORMAL = BLOCKS.register("grave_normal", () -> new BlockTomb(Block.Properties.of(Material.STONE), ModelTomb.GRAVE_NORMAL));
-  public static final RegistryObject<BlockTomb> GRAVE_CROSS = BLOCKS.register("grave_cross", () -> new BlockTomb(Block.Properties.of(Material.STONE), ModelTomb.GRAVE_CROSS));
-  public static final RegistryObject<BlockTomb> TOMBSTONE = BLOCKS.register("tombstone", () -> new BlockTomb(Block.Properties.of(Material.STONE), ModelTomb.GRAVE_TOMB));
+  public static final RegistryObject<BlockTomb> GRAVE_SIMPLE = BLOCKS.register("grave_simple", () -> new BlockTomb(Block.Properties.of().mapColor(MapColor.STONE), ModelTomb.GRAVE_SIMPLE));
+  public static final RegistryObject<BlockTomb> GRAVE_NORMAL = BLOCKS.register("grave_normal", () -> new BlockTomb(Block.Properties.of().mapColor(MapColor.STONE), ModelTomb.GRAVE_NORMAL));
+  public static final RegistryObject<BlockTomb> GRAVE_CROSS = BLOCKS.register("grave_cross", () -> new BlockTomb(Block.Properties.of().mapColor(MapColor.STONE), ModelTomb.GRAVE_CROSS));
+  public static final RegistryObject<BlockTomb> TOMBSTONE = BLOCKS.register("tombstone", () -> new BlockTomb(Block.Properties.of().mapColor(MapColor.STONE), ModelTomb.GRAVE_TOMB));
   //Items
   public static final RegistryObject<GraveKeyItem> GRAVE_KEY = ITEMS.register("grave_key", () -> new GraveKeyItem(new Item.Properties()));
   //BlockEntities
