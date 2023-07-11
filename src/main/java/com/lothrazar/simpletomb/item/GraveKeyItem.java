@@ -1,5 +1,7 @@
 package com.lothrazar.simpletomb.item;
 
+import java.util.List;
+import javax.annotation.Nullable;
 import com.lothrazar.simpletomb.ConfigTomb;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.block.BlockTomb;
@@ -32,9 +34,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-
-import javax.annotation.Nullable;
-import java.util.List;
 
 public class GraveKeyItem extends SwordItem {
 

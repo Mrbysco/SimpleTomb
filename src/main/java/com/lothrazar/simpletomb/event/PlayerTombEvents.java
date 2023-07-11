@@ -1,5 +1,16 @@
 package com.lothrazar.simpletomb.event;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.apache.logging.log4j.Level;
 import com.lothrazar.PartEnum;
 import com.lothrazar.simpletomb.ConfigTomb;
 import com.lothrazar.simpletomb.ModTomb;
@@ -39,18 +50,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
-import org.apache.logging.log4j.Level;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 public class PlayerTombEvents {
 
@@ -107,43 +106,21 @@ public class PlayerTombEvents {
 
   private void storeSoulboundsOnBody(Player player, List<ItemStack> keys) {
     CompoundTag persistentTag = EntityHelper.getPersistentTag(player);
-    ListTag stackList = persistentTag.contains(TB_SOULBOUND_STACKS) ?
-            persistentTag.getList(TB_SOULBOUND_STACKS, CompoundTag.TAG_COMPOUND) :
-            new ListTag();
+    ListTag stackList = persistentTag.contains(TB_SOULBOUND_STACKS) ? persistentTag.getList(TB_SOULBOUND_STACKS, CompoundTag.TAG_COMPOUND) : new ListTag();
     for (ItemStack key : keys) {
       stackList.add(key.serializeNBT());
     }
     persistentTag.put(TB_SOULBOUND_STACKS, stackList);
     keys.clear();
   }
-  //  private void storeIntegerStorageMap(PlayerEntity player) {
-  //    //  for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
-  //    //      ModTomb.LOGGER.info(i + " player inventory = " + player.inventory.getStackInSlot(i));
-  //    //TODO: create an ITEMIDSLOT -> MAP
-  //    //to remap those first
-  //    //
-  //    //
-  //    // }
-  //  }
-  //
-  //  @SubscribeEvent
-  //  public void onPlayerDeath(LivingDeathEvent event) {
-  //    if (!ConfigTomb.TOMBENABLED.get()) {
-  //      return;
-  //    }
-  //    if (event.getEntityLiving() instanceof PlayerEntity) {
-  //      PlayerEntity player = (PlayerEntity) event.getEntityLiving();
-  //      storeIntegerStorageMap(player);
-  //    }
-  //  }
+
   @SubscribeEvent(receiveCanceled = true)
   public void onLivingDeath(LivingDeathEvent event) {
     if (!EntityHelper.isValidPlayer(event.getEntityLiving()) ||
-            WorldHelper.isRuleKeepInventory((Player) event.getEntityLiving())) {
+        WorldHelper.isRuleKeepInventory((Player) event.getEntityLiving())) {
       return;
     }
-
-    if(!event.isCanceled()) {
+    if (!event.isCanceled()) {
       Player player = (Player) event.getEntityLiving();
       PartEnum part = ConfigTomb.KEEPPARTS.get();
       switch (part) {
@@ -182,15 +159,13 @@ public class PlayerTombEvents {
         WorldHelper.isRuleKeepInventory((Player) event.getEntityLiving())) {
       return;
     }
-
     Player player = (Player) event.getEntityLiving();
     List<ItemStack> keepStacks = keepingMap.getOrDefault(player.getUUID(), new ArrayList<>());
-    if(!keepStacks.isEmpty()) {
+    if (!keepStacks.isEmpty()) {
       event.getDrops().removeIf(entity -> keepStacks.contains(entity.getItem()));
       this.storeSoulboundsOnBody(player, keepStacks);
       keepingMap.remove(player.getUUID());
     }
-
     saveBackup(event);
     placeTombstone(event);
   }

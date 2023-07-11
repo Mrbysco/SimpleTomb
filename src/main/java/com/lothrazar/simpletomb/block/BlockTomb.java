@@ -63,11 +63,6 @@ public class BlockTomb extends BaseEntityBlock {
     return ModTomb.MODID + ".grave." + this.name;
   }
 
-//  @Override
-//  public boolean isToolEffective(BlockState state, ToolType tool) { TODO: See if there's a replacement
-//    return false;
-//  }
-
   @Override
   public boolean dropFromExplosion(Explosion explosionIn) {
     return false;
@@ -113,11 +108,11 @@ public class BlockTomb extends BaseEntityBlock {
         MessageType.MESSAGE_OPEN_GRAVE_NEED_OWNER.sendSpecialMessage(player);
         return;
       }
+      TombRegistry.GRAVE_KEY.get().removeKeyForGraveInInventory(player, new LocationBlockPos(pos, level));
       //either you are the owner, or it has setting that says anyone can access
       tile.giveInventory(player);
       //clear saved loc
       DeathHelper.INSTANCE.deleteLastGrave(player);
-      TombRegistry.GRAVE_KEY.get().removeKeyForGraveInInventory(player, new LocationBlockPos(pos, level));
     }
   }
 
@@ -128,7 +123,6 @@ public class BlockTomb extends BaseEntityBlock {
       if (blockentity instanceof BlockEntityTomb blockEntityTomb) {
         blockEntityTomb.dropInventory(level, pos);
       }
-
       super.onRemove(state, level, pos, newState, isMoving);
     }
   }
