@@ -38,10 +38,10 @@ public class ClientUtils {
 
   public static void produceParticleCasting(LivingEntity caster, Predicate<LivingEntity> predic) {
     Minecraft mc = Minecraft.getInstance();
-    if (caster != null && caster.level instanceof ClientLevel) {
+    if (caster != null && caster.level() instanceof ClientLevel) {
       ParticleCasting particle;
       for (int i = 1; i <= 2; i++) {
-        ClientLevel cworld = (ClientLevel) caster.level;
+        ClientLevel cworld = (ClientLevel) caster.level();
         particle = new ParticleCasting(cworld, caster, predic, 0d, i * 0.5d);
         mc.particleEngine.add(particle);
         particle = new ParticleCasting(cworld, caster, predic, 0.5d, (i + 1) * 0.5d);
