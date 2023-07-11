@@ -1,5 +1,7 @@
 package com.lothrazar.simpletomb.block;
 
+import com.lothrazar.library.block.BlockFlib;
+import com.lothrazar.library.block.EntityBlockFlib;
 import com.lothrazar.simpletomb.ModTomb;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.data.DeathHelper;
@@ -17,7 +19,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -29,8 +30,9 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class BlockTomb extends BaseEntityBlock {
+public class BlockTomb extends EntityBlockFlib {
 
+  BaseEntityBlock x;
   public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
   public static final IntegerProperty MODEL_TEXTURE = IntegerProperty.create("model_texture", 0, 1);
   public static final BooleanProperty IS_ENGRAVED = BooleanProperty.create("is_engraved");
@@ -39,14 +41,9 @@ public class BlockTomb extends BaseEntityBlock {
   protected final ModelTomb graveModel;
 
   public BlockTomb(Block.Properties properties, ModelTomb graveModel) {
-    super(properties.noOcclusion().strength(-1.0F, 3600000.0F));
+    super(properties.noOcclusion().strength(-1.0F, 3600000.0F), new BlockFlib.Settings().noTooltip());
     this.graveModel = graveModel;
     this.name = graveModel.getSerializedName();
-  }
-
-  @Override
-  public RenderShape getRenderShape(BlockState bs) {
-    return RenderShape.MODEL;
   }
 
   @Override

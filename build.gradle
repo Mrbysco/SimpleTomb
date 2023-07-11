@@ -65,6 +65,7 @@ minecraft {
 }
 
 dependencies {
+ implementation fg.deobf("curse.maven:flib-661261:4583429")
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
@@ -118,6 +119,8 @@ repositories {
   maven {
       url = "https://maven.theillusivec4.top/"
   }
+  maven { url = 'https://maven.blamejared.com' }   
+  maven { url = 'https://www.cursemaven.com'  }
 
 }
 
