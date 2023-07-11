@@ -108,11 +108,11 @@ public class BlockTomb extends BaseEntityBlock {
         MessageType.MESSAGE_OPEN_GRAVE_NEED_OWNER.sendSpecialMessage(player);
         return;
       }
+      TombRegistry.GRAVE_KEY.get().removeKeyForGraveInInventory(player, new LocationBlockPos(pos, level));
       //either you are the owner, or it has setting that says anyone can access
       tile.giveInventory(player);
       //clear saved loc
       DeathHelper.INSTANCE.deleteLastGrave(player);
-      TombRegistry.GRAVE_KEY.get().removeKeyForGraveInInventory(player, new LocationBlockPos(pos, level));
     }
   }
 
