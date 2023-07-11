@@ -10,12 +10,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
 import org.apache.logging.log4j.Level;
 import com.lothrazar.simpletomb.ConfigTomb;
 import com.lothrazar.simpletomb.ModTomb;
+import com.lothrazar.simpletomb.PartEnum;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.block.BlockEntityTomb;
 import com.lothrazar.simpletomb.block.BlockTomb;
@@ -42,6 +40,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
+import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
@@ -89,7 +90,7 @@ public class PlayerTombEvents {
 
   @SubscribeEvent(priority = EventPriority.LOWEST)
   public void onDestroy(LivingDestroyBlockEvent event) {
-    if(event.getState().getBlock() instanceof BlockTomb && !(event.getEntity() instanceof Player)) {
+    if (event.getState().getBlock() instanceof BlockTomb && !(event.getEntity() instanceof Player)) {
       event.setCanceled(true);
     }
   }
@@ -114,33 +115,49 @@ public class PlayerTombEvents {
 
   private void storeSoulboundsOnBody(Player player, List<ItemStack> keys) {
     CompoundTag persistentTag = EntityHelper.getPersistentTag(player);
-    ListTag stackList = new ListTag();
-    persistentTag.put(TB_SOULBOUND_STACKS, stackList);
+    ListTag stackList = persistentTag.contains(TB_SOULBOUND_STACKS) ? persistentTag.getList(TB_SOULBOUND_STACKS, CompoundTag.TAG_COMPOUND) : new ListTag();
     for (ItemStack key : keys) {
       stackList.add(key.serializeNBT());
     }
+    persistentTag.put(TB_SOULBOUND_STACKS, stackList);
     keys.clear();
   }
-  //  private void storeIntegerStorageMap(PlayerEntity player) {
-  //    //  for (int i = 0; i < player.inventory.getSizeInventory(); i++) {
-  //    //      ModTomb.LOGGER.info(i + " player inventory = " + player.inventory.getStackInSlot(i));
-  //    //TODO: create an ITEMIDSLOT -> MAP
-  //    //to remap those first
-  //    //
-  //    //
-  //    // }
-  //  }
-  //
-  //  @SubscribeEvent
-  //  public void onPlayerDeath(LivingDeathEvent event) {
-  //    if (!ConfigTomb.TOMBENABLED.get()) {
-  //      return;
-  //    }
-  //    if (event.getEntityLiving() instanceof PlayerEntity) {
-  //      PlayerEntity player = (PlayerEntity) event.getEntityLiving();
-  //      storeIntegerStorageMap(player);
-  //    }
-  //  }
+
+  @SubscribeEvent(receiveCanceled = true)
+  public void onLivingDeath(LivingDeathEvent event) {
+    if (!EntityHelper.isValidPlayer(event.getEntity()) ||
+        WorldHelper.isRuleKeepInventory((Player) event.getEntity())) {
+      return;
+    }
+    if (!event.isCanceled()) {
+      Player player = (Player) event.getEntity();
+      PartEnum part = ConfigTomb.KEEPPARTS.get();
+      switch (part) {
+        case HOTBAR -> {
+          List<ItemStack> hotbarStacks = new ArrayList<>();
+          for (int i = 0; i < 9; i++) {
+            hotbarStacks.add(i, player.getInventory().items.get(i));
+          }
+          keepingMap.put(player.getUUID(), hotbarStacks);
+        }
+        case ARMOR -> {
+          List<ItemStack> armorStacks = new ArrayList<>();
+          player.getInventory().armor.forEach(armorStacks::add);
+          keepingMap.put(player.getUUID(), armorStacks);
+        }
+        case HOTBAR_AND_ARMOR -> {
+          List<ItemStack> stacks = new ArrayList<>();
+          for (int i = 0; i < 9; i++) {
+            stacks.add(i, player.getInventory().items.get(i));
+          }
+          player.getInventory().armor.forEach(stacks::add);
+          keepingMap.put(player.getUUID(), stacks);
+        }
+      }
+    }
+  }
+
+  private final static Map<UUID, List<ItemStack>> keepingMap = new HashMap<>();
 
   @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
   public void onPlayerDrops(LivingDropsEvent event) {
@@ -151,6 +168,13 @@ public class PlayerTombEvents {
         WorldHelper.isRuleKeepInventory((Player) event.getEntity())) {
       return;
     }
+    Player player = (Player) event.getEntity();
+    List<ItemStack> keepStacks = keepingMap.getOrDefault(player.getUUID(), new ArrayList<>());
+    if (!keepStacks.isEmpty()) {
+      event.getDrops().removeIf(entity -> keepStacks.contains(entity.getItem()));
+      this.storeSoulboundsOnBody(player, keepStacks);
+      keepingMap.remove(player.getUUID());
+    }
     saveBackup(event);
     placeTombstone(event);
   }
@@ -160,7 +184,7 @@ public class PlayerTombEvents {
     Player player = event.getEntity();
     File mctomb = new File(event.getPlayerDirectory(), player.getUUID() + TOMB_FILE_EXT);
     //
-    //save player data to the file 
+    //save player data to the file
     if (grv.containsKey(player.getUUID())) {
       //yes i have data to save
       PlayerTombRecords dataToSave = grv.get(player.getUUID());
@@ -223,7 +247,7 @@ public class PlayerTombEvents {
     }
     if (!isEmpty) {
       //NEW data model. write to string
-      //timestamp 
+      //timestamp
       tombstoneTag.putLong("timestamp", System.currentTimeMillis());
       tombstoneTag.put("drops", drops);
       tombstoneTag.put("pos", NbtUtils.writeBlockPos(player.blockPosition()));
@@ -317,7 +341,6 @@ public class PlayerTombEvents {
     }
     if (ConfigTomb.TOMBCHAT.get()) {
       MessageType.MESSAGE_NEW_GRAVE.sendSpecialMessage(player, String.format("(%d, %d, %d) " + spawnPos.dim, spawnPos.x, spawnPos.y, spawnPos.z));
-      MessageType.MESSAGE_JOURNEYMAP.sendSpecialMessage(player, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.dim);
     }
   }
 

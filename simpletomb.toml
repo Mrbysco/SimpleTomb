@@ -7,6 +7,10 @@
 	#####################################################################################
 	[simpletomb.tomb]
 		#
+		#Keep parts of the inventory
+		#Allowed Values: NONE, HOTBAR, ARMOR, HOTBAR_AND_ARMOR
+		keep_parts = "NONE"
+		#
 		#When searching for a grave location, this is the maximum range to check
 		#Range: 2 ~ 128
 		search_range = 8
