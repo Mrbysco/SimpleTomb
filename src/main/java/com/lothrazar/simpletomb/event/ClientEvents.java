@@ -1,5 +1,7 @@
 package com.lothrazar.simpletomb.event;
 
+import org.joml.Matrix4f;
+import com.lothrazar.library.util.LevelWorldUtil;
 import com.lothrazar.simpletomb.ModTomb;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.client.LineRenderType;
@@ -25,7 +27,6 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.joml.Matrix4f;
 
 @Mod.EventBusSubscriber(modid = ModTomb.MODID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 @OnlyIn(Dist.CLIENT)
@@ -41,7 +42,7 @@ public class ClientEvents {
 
   @SubscribeEvent
   public void render(RenderLevelStageEvent event) {
-    if(event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+    if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
       LocalPlayer player = Minecraft.getInstance().player;
       if (player != null && player.level() != null) {
         ItemStack stack = player.getMainHandItem();
@@ -49,7 +50,7 @@ public class ClientEvents {
           MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
           LocationBlockPos location = TombRegistry.GRAVE_KEY.get().getTombPos(stack);
           if (location != null && !location.isOrigin() &&
-              location.dim.equalsIgnoreCase(WorldHelper.dimensionToString(player.level())) &&
+              location.dim.equalsIgnoreCase(LevelWorldUtil.dimensionToString(player.level())) &&
               player.level().isInWorldBounds(location.toBlockPos())) {
             PoseStack poseStack = event.getPoseStack();
             poseStack.pushPose();

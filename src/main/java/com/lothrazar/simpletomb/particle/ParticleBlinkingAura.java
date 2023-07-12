@@ -1,5 +1,7 @@
 package com.lothrazar.simpletomb.particle;
 
+import com.lothrazar.library.particle.TransparentParticle;
+import com.lothrazar.library.particle.data.ParticleOptionsTwoInt;
 import com.lothrazar.simpletomb.helper.WorldHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -53,7 +55,7 @@ public class ParticleBlinkingAura extends TransparentParticle {
     return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
   }
 
-  public static class Factory implements ParticleProvider<ParticleDataTwoInt> {
+  public static class Factory implements ParticleProvider<ParticleOptionsTwoInt> {
 
     private SpriteSet spriteSet;
 
@@ -62,7 +64,7 @@ public class ParticleBlinkingAura extends TransparentParticle {
     }
 
     @Override
-    public Particle createParticle(ParticleDataTwoInt type, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
+    public Particle createParticle(ParticleOptionsTwoInt type, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
       return new ParticleBlinkingAura(this.spriteSet, world, x, y, z, type.oneInt, type.twoInt);
     }
   }

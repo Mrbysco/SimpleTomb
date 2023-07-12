@@ -19,11 +19,6 @@ public class WorldHelper {
     return (float) (rand.nextDouble() * (max - min) + min);
   }
 
-  public static String dimensionToString(Level level) {
-    //example: returns "minecraft:overworld" resource location
-    return level.dimension().location().toString();
-  }
-
   public static boolean isValidPlacement(Level level, BlockPos myPos) {
     //0 is the bottom bedrock level
     //so if we place there, players cant place a block under it to stand safely

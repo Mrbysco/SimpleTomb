@@ -2,13 +2,13 @@ package com.lothrazar.simpletomb.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
+import com.lothrazar.library.util.LevelWorldUtil;
 import com.lothrazar.simpletomb.ConfigTomb;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.block.BlockTomb;
 import com.lothrazar.simpletomb.data.LocationBlockPos;
 import com.lothrazar.simpletomb.data.MessageType;
 import com.lothrazar.simpletomb.helper.NBTHelper;
-import com.lothrazar.simpletomb.helper.WorldHelper;
 import com.lothrazar.simpletomb.proxy.ClientUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -53,7 +53,7 @@ public class GraveKeyItem extends SwordItem {
     if (entity instanceof Player player) {
       LocationBlockPos location = this.getTombPos(stack);
       if (location == null || location.isOrigin()
-              || !location.dim.equalsIgnoreCase(WorldHelper.dimensionToString(level))) {
+          || !location.dim.equalsIgnoreCase(LevelWorldUtil.dimensionToString(level))) {
         return;
       }
       double distance = location.getDistance(player.blockPosition());
@@ -63,7 +63,7 @@ public class GraveKeyItem extends SwordItem {
       }
       else {
         canTp = (ConfigTomb.TPSURVIVAL.get() > 0 &&
-                distance < ConfigTomb.TPSURVIVAL.get()) || ConfigTomb.TPSURVIVAL.get() == -1;
+            distance < ConfigTomb.TPSURVIVAL.get()) || ConfigTomb.TPSURVIVAL.get() == -1;
         //-1 is magic value for ANY DISTANCE IS OK
       }
       if (canTp) {

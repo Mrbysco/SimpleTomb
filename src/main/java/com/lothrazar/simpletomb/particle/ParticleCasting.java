@@ -1,5 +1,7 @@
 package com.lothrazar.simpletomb.particle;
 
+import java.util.function.Predicate;
+import com.lothrazar.library.particle.AbstractSingleQuadParticle;
 import com.lothrazar.simpletomb.ModTomb;
 import com.lothrazar.simpletomb.helper.WorldHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -9,10 +11,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import java.util.function.Predicate;
-
 @OnlyIn(Dist.CLIENT)
-public class ParticleCasting extends CustomParticle {
+public class ParticleCasting extends AbstractSingleQuadParticle {
 
   private static final ResourceLocation COMMON_TEXTURE = new ResourceLocation(ModTomb.MODID, "textures/particle/casting.png");
   private final LivingEntity caster;
@@ -78,7 +78,7 @@ public class ParticleCasting extends CustomParticle {
   }
 
   @Override
-  ResourceLocation getTexture() {
+  public ResourceLocation getTexture() {
     return COMMON_TEXTURE;
   }
 }

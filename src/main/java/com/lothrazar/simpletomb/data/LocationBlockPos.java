@@ -1,6 +1,6 @@
 package com.lothrazar.simpletomb.data;
 
-import com.lothrazar.simpletomb.helper.WorldHelper;
+import com.lothrazar.library.util.LevelWorldUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -15,7 +15,7 @@ public class LocationBlockPos {
   public static final LocationBlockPos ORIGIN = new LocationBlockPos(0, 0, 0, "");
 
   public LocationBlockPos(BlockPos pos, Level level) {
-    this(pos, WorldHelper.dimensionToString(level));
+    this(pos, LevelWorldUtil.dimensionToString(level));
   }
 
   public LocationBlockPos(BlockPos pos, String dim) {

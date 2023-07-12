@@ -1,5 +1,6 @@
 package com.lothrazar.simpletomb.particle;
 
+import com.lothrazar.library.particle.TransparentParticle;
 import com.lothrazar.simpletomb.helper.WorldHelper;
 import com.lothrazar.simpletomb.proxy.ClientUtils;
 import net.minecraft.client.multiplayer.ClientLevel;
