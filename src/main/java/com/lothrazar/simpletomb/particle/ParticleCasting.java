@@ -2,6 +2,7 @@ package com.lothrazar.simpletomb.particle;
 
 import java.util.function.Predicate;
 import com.lothrazar.library.particle.AbstractSingleQuadParticle;
+import com.lothrazar.library.util.RenderUtil;
 import com.lothrazar.simpletomb.ModTomb;
 import com.lothrazar.simpletomb.helper.WorldHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -35,7 +36,7 @@ public class ParticleCasting extends AbstractSingleQuadParticle {
     this.quadSize = world.random.nextFloat() * 0.1f + 0.15f;
     this.angle = angle + WorldHelper.getRandom(world.random, -0.25, 0.25);
     this.roll = world.random.nextFloat() * (float) (2d * Math.PI);
-    float[] color = WorldHelper.getRGBColor3F(14937088);
+    float[] color = RenderUtil.getRGBColor3F(14937088);
     this.colorR = color[0];
     this.colorG = color[1];
     this.colorB = color[2];

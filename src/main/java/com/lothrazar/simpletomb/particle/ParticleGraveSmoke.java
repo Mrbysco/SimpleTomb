@@ -74,7 +74,7 @@ public class ParticleGraveSmoke extends TransparentParticle {
 
     @Override
     public Particle createParticle(SimpleParticleType type, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
-      RandomSource rand = (world == null) ? RandomSource.createThreadSafe() : world.random;
+      RandomSource rand = (world == null) ? RandomSource.create(0) : world.random;
       return new ParticleGraveSmoke(this.spriteSet, world, x, y + 0.4d, z, (rand.nextFloat() - 0.5f) * 0.03d, 0d, (rand.nextFloat() - 0.5f) * 0.03d);
     }
   }

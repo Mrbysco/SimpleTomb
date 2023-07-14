@@ -1,4 +1,4 @@
-package com.lothrazar.simpletomb;
+package com.lothrazar.simpletomb.data;
 
 public enum PartEnum {
   NONE,

@@ -1,11 +1,10 @@
 package com.lothrazar.simpletomb.helper;
 
-import com.lothrazar.simpletomb.data.LocationBlockPos;
+import javax.annotation.Nullable;
+import com.lothrazar.library.core.BlockPosDim;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-
-import javax.annotation.Nullable;
 
 public class NBTHelper {
 
@@ -31,28 +30,28 @@ public class NBTHelper {
             : BlockPos.ZERO;
   }
 
-  public static ItemStack setLocation(ItemStack stack, String keyName, LocationBlockPos location) {
+  public static ItemStack setLocation(ItemStack stack, String keyName, BlockPosDim location) {
     setLocation(getOrCreateTag(stack), keyName, location);
     return stack;
   }
 
-  private static CompoundTag setLocation(CompoundTag tag, String keyName, LocationBlockPos location) {
+  private static CompoundTag setLocation(CompoundTag tag, String keyName, BlockPosDim location) {
     setBlockPos(tag, keyName, location.toBlockPos());
-    tag.putString(keyName + "D", location.dim);
+    tag.putString(keyName + "D", location.getDimension());
     return tag;
   }
 
-  public static LocationBlockPos getLocation(ItemStack stack, String keyName) {
+  public static BlockPosDim getLocation(ItemStack stack, String keyName) {
     return getLocation(getOrCreateTag(stack), keyName);
   }
 
-  private static LocationBlockPos getLocation(@Nullable CompoundTag tag, String keyName) {
+  private static BlockPosDim getLocation(@Nullable CompoundTag tag, String keyName) {
     if (tag != null && tag.contains(keyName + "D")) {
       BlockPos pos = getBlockPos(tag, keyName);
       if (!pos.equals(BlockPos.ZERO)) {
-        return new LocationBlockPos(pos, tag.getString(keyName + "D"));
+        return new BlockPosDim(pos, tag.getString(keyName + "D"));
       }
     }
-    return LocationBlockPos.ORIGIN;
+    return BlockPosDim.ORIGIN;
   }
 }

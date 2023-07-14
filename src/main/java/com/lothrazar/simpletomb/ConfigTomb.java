@@ -1,6 +1,7 @@
 package com.lothrazar.simpletomb;
 
 import com.lothrazar.library.config.ConfigTemplate;
+import com.lothrazar.simpletomb.data.PartEnum;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.EnumValue;

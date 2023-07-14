@@ -1,7 +1,9 @@
 package com.lothrazar.simpletomb.block;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import com.lothrazar.library.util.TimeUtil;
 import com.lothrazar.simpletomb.data.MessageType;
-import com.lothrazar.simpletomb.helper.WorldHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -20,9 +22,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 @OnlyIn(Dist.CLIENT)
 public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
 
@@ -33,12 +32,9 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
     this.font = cx.getFont();
   }
 
-  private static final String TIME_FORMAT = "HH:mm:ss";
-  private static final String DATE_FORMAT = "yyyy/MM/dd";
-
   @Override
   public void render(BlockEntityTomb te, float partialTicks, PoseStack poseStack,
-					 MultiBufferSource iRenderTypeBuffer, int light, int destroyStage) {
+      MultiBufferSource iRenderTypeBuffer, int light, int destroyStage) {
     if (te == null) {
       return;
     }
@@ -52,7 +48,7 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
     Direction facing = knownState.getValue(BlockTomb.FACING);
     BlockTomb grave = (BlockTomb) knownState.getBlock();
     ModelTomb graveModel = grave.getGraveType();
-    renderHalloween(poseStack, iRenderTypeBuffer, graveModel, facing, light, WorldHelper.isNight(te.getLevel()));
+    renderHalloween(poseStack, iRenderTypeBuffer, graveModel, facing, light, TimeUtil.isNight(te.getLevel()));
     light = 0xf000f0;
     int rotationIndex;
     float modX = 0.5F, modY, modZ = 0.5F;
@@ -146,8 +142,8 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
     String dateString = MessageType.MESSAGE_DAY.getTranslation(days);
     showString(ChatFormatting.BOLD + dateString, poseStack, iRenderTypeBuffer, fontRender, 20, textColor, scaleForDate, light);
     Date date = new Date(te.getOwnerDeathTime());
-    String fdateString = new SimpleDateFormat(DATE_FORMAT).format(date);
-    String timeString = new SimpleDateFormat(TIME_FORMAT).format(date);
+    String fdateString = new SimpleDateFormat(TimeUtil.DATE_FORMAT).format(date);
+    String timeString = new SimpleDateFormat(TimeUtil.TIME_FORMAT).format(date);
     showString(ChatFormatting.BOLD + fdateString, poseStack, iRenderTypeBuffer, fontRender, 36, textColor, scaleForDate, light);
     showString(ChatFormatting.BOLD + timeString, poseStack, iRenderTypeBuffer, fontRender, 46, textColor, scaleForDate, light);
     poseStack.popPose();

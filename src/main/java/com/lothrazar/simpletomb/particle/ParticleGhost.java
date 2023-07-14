@@ -71,7 +71,7 @@ public class ParticleGhost extends TransparentParticle {
 
     @Override
     public Particle createParticle(SimpleParticleType type, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
-      RandomSource rand = (world == null) ? RandomSource.createThreadSafe() : world.random;
+      RandomSource rand = (world == null) ? RandomSource.create(0) : world.random;
       return new ParticleGhost(this.spriteSet, world, x, y, z, WorldHelper.getRandom(rand, -0.05d, 0.05d), 0d, WorldHelper.getRandom(rand, -0.05d, 0.05d));
     }
   }

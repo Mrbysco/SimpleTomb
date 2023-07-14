@@ -1,25 +1,25 @@
 package com.lothrazar.simpletomb.data;
 
-import net.minecraft.world.entity.player.Player;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import com.lothrazar.library.core.BlockPosDim;
+import net.minecraft.world.entity.player.Player;
 
 public class DeathHelper {
 
   public static final DeathHelper INSTANCE = new DeathHelper();
-  private final Map<UUID, LocationBlockPos> lastGraveList = new HashMap<>();
+  private final Map<UUID, BlockPosDim> lastGraveList = new HashMap<>();
 
-  public LocationBlockPos getLastGrave(Player player) {
-    return lastGraveList.getOrDefault(player.getGameProfile().getId(), LocationBlockPos.ORIGIN);
+  public BlockPosDim getLastGrave(Player player) {
+    return lastGraveList.getOrDefault(player.getGameProfile().getId(), BlockPosDim.ORIGIN);
   }
 
-  public LocationBlockPos deleteLastGrave(Player player) {
+  public BlockPosDim deleteLastGrave(Player player) {
     return lastGraveList.remove(player.getGameProfile().getId());
   }
 
-  public LocationBlockPos putLastGrave(Player player, LocationBlockPos loc) {
+  public BlockPosDim putLastGrave(Player player, BlockPosDim loc) {
     return lastGraveList.put(player.getGameProfile().getId(), loc);
   }
 }

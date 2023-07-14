@@ -1,9 +1,11 @@
 package com.lothrazar.simpletomb.event;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import com.lothrazar.library.core.BlockPosDim;
 import com.lothrazar.simpletomb.ModTomb;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.block.BlockEntityTomb;
-import com.lothrazar.simpletomb.data.LocationBlockPos;
 import com.lothrazar.simpletomb.data.PlayerTombRecords;
 import com.lothrazar.simpletomb.data.TombCommands;
 import com.lothrazar.simpletomb.helper.WorldHelper;
@@ -39,9 +41,6 @@ import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
-
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class CommandEvents {
 
@@ -124,7 +123,7 @@ public class CommandEvents {
         ModTomb.LOGGER.error("Invalid grave index " + index + "; try between 0 and  " + (found.playerGraves.size() - 1));
         return 1;
       }
-      LocationBlockPos spawnPos = new LocationBlockPos(PlayerTombRecords.getPos(grave), PlayerTombRecords.getDim(grave));
+      BlockPosDim spawnPos = new BlockPosDim(PlayerTombRecords.getPos(grave), PlayerTombRecords.getDim(grave));
       ItemStack key = new ItemStack(TombRegistry.GRAVE_KEY.get());
       TombRegistry.GRAVE_KEY.get().setTombPos(key, spawnPos);
       PlayerTombEvents.putKeyName(target.getName(), key);

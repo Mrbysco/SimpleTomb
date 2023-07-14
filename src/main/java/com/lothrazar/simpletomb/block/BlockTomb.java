@@ -2,10 +2,10 @@ package com.lothrazar.simpletomb.block;
 
 import com.lothrazar.library.block.BlockFlib;
 import com.lothrazar.library.block.EntityBlockFlib;
+import com.lothrazar.library.core.BlockPosDim;
 import com.lothrazar.simpletomb.ModTomb;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.data.DeathHelper;
-import com.lothrazar.simpletomb.data.LocationBlockPos;
 import com.lothrazar.simpletomb.data.MessageType;
 import com.lothrazar.simpletomb.helper.EntityHelper;
 import net.minecraft.core.BlockPos;
@@ -105,7 +105,7 @@ public class BlockTomb extends EntityBlockFlib {
         MessageType.MESSAGE_OPEN_GRAVE_NEED_OWNER.sendSpecialMessage(player);
         return;
       }
-      TombRegistry.GRAVE_KEY.get().removeKeyForGraveInInventory(player, new LocationBlockPos(pos, level));
+      TombRegistry.GRAVE_KEY.get().removeKeyForGraveInInventory(player, new BlockPosDim(pos, level));
       //either you are the owner, or it has setting that says anyone can access
       tile.giveInventory(player);
       //clear saved loc

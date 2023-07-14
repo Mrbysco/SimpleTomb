@@ -2,11 +2,11 @@ package com.lothrazar.simpletomb.item;
 
 import java.util.List;
 import javax.annotation.Nullable;
+import com.lothrazar.library.core.BlockPosDim;
 import com.lothrazar.library.util.LevelWorldUtil;
 import com.lothrazar.simpletomb.ConfigTomb;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.block.BlockTomb;
-import com.lothrazar.simpletomb.data.LocationBlockPos;
 import com.lothrazar.simpletomb.data.MessageType;
 import com.lothrazar.simpletomb.helper.NBTHelper;
 import com.lothrazar.simpletomb.proxy.ClientUtils;
@@ -51,9 +51,9 @@ public class GraveKeyItem extends SwordItem {
   @Override
   public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int count) {
     if (entity instanceof Player player) {
-      LocationBlockPos location = this.getTombPos(stack);
+      BlockPosDim location = this.getTombPos(stack);
       if (location == null || location.isOrigin()
-          || !location.dim.equalsIgnoreCase(LevelWorldUtil.dimensionToString(level))) {
+          || !location.getDimension().equalsIgnoreCase(LevelWorldUtil.dimensionToString(level))) {
         return;
       }
       double distance = location.getDistance(player.blockPosition());
@@ -118,21 +118,21 @@ public class GraveKeyItem extends SwordItem {
   @OnlyIn(Dist.CLIENT)
   public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> list, TooltipFlag flag) {
     if (Screen.hasShiftDown()) {
-      LocationBlockPos location = this.getTombPos(stack);
+      BlockPosDim location = this.getTombPos(stack);
       //      this.addItemPosition(list, this.getTombPos(stack));
       Player player = Minecraft.getInstance().player;
       if (player != null && !location.isOrigin()) {
         BlockPos pos = player.blockPosition();
         int distance = (int) location.getDistance(pos);
         list.add(Component.translatable(MessageType.MESSAGE_DISTANCE.getKey(),
-            distance, location.x, location.y, location.z, location.dim)
+            distance, location.getX(), location.getY(), location.getZ(), location.getDimension())
             .withStyle(ChatFormatting.DARK_PURPLE));
       }
     }
     super.appendHoverText(stack, world, list, flag);
   }
 
-  public boolean setTombPos(ItemStack stack, LocationBlockPos location) {
+  public boolean setTombPos(ItemStack stack, BlockPosDim location) {
     if (stack.getItem() == this && !location.isOrigin()) {
       NBTHelper.setLocation(stack, TOMB_POS, location);
       return true;
@@ -140,16 +140,16 @@ public class GraveKeyItem extends SwordItem {
     return false;
   }
 
-  public LocationBlockPos getTombPos(ItemStack stack) {
+  public BlockPosDim getTombPos(ItemStack stack) {
     return stack.getItem() == this
         ? NBTHelper.getLocation(stack, TOMB_POS)
-        : LocationBlockPos.ORIGIN;
+        : BlockPosDim.ORIGIN;
   }
 
   /**
    * Look for any key that matches this Location and remove that key from player
    */
-  public boolean removeKeyForGraveInInventory(Player player, LocationBlockPos graveLoc) {
+  public boolean removeKeyForGraveInInventory(Player player, BlockPosDim graveLoc) {
     IItemHandler itemHandler = player.getCapability(ForgeCapabilities.ITEM_HANDLER, null).orElse(null);
     if (itemHandler != null) {
       for (int i = 0; i < itemHandler.getSlots(); ++i) {

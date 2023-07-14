@@ -2,6 +2,7 @@ package com.lothrazar.simpletomb.particle;
 
 import com.lothrazar.library.particle.TransparentParticle;
 import com.lothrazar.library.particle.data.ParticleOptionsTwoInt;
+import com.lothrazar.library.util.RenderUtil;
 import com.lothrazar.simpletomb.helper.WorldHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -25,8 +26,8 @@ public class ParticleBlinkingAura extends TransparentParticle {
     scale(WorldHelper.getRandom(world.random, 0.6f, 0.8f));
     setLifetime(7);
     this.hasPhysics = false;
-    this.colorCodeMin = WorldHelper.getRGBColor3F(colorMin);
-    this.colorCodeMax = WorldHelper.getRGBColor3F(colorMax);
+    this.colorCodeMin = RenderUtil.getRGBColor3F(colorMin);
+    this.colorCodeMax = RenderUtil.getRGBColor3F(colorMax);
     setColor(this.colorCodeMin[0], this.colorCodeMin[1], this.colorCodeMin[2]);
     this.spriteSet = spriteSet;
     setSpriteFromAge(this.spriteSet);

@@ -11,15 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.logging.log4j.Level;
+import com.lothrazar.library.core.BlockPosDim;
 import com.lothrazar.simpletomb.ConfigTomb;
 import com.lothrazar.simpletomb.ModTomb;
-import com.lothrazar.simpletomb.PartEnum;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.block.BlockEntityTomb;
 import com.lothrazar.simpletomb.block.BlockTomb;
 import com.lothrazar.simpletomb.data.DeathHelper;
-import com.lothrazar.simpletomb.data.LocationBlockPos;
 import com.lothrazar.simpletomb.data.MessageType;
+import com.lothrazar.simpletomb.data.PartEnum;
 import com.lothrazar.simpletomb.data.PlayerTombRecords;
 import com.lothrazar.simpletomb.helper.EntityHelper;
 import com.lothrazar.simpletomb.helper.WorldHelper;
@@ -289,7 +289,7 @@ public class PlayerTombEvents {
       return;
     }
     BlockPos initPos = WorldHelper.getInitialPos(world, new BlockPos(player.blockPosition()));
-    LocationBlockPos spawnPos = WorldHelper.findGraveSpawn(player, initPos);
+    BlockPosDim spawnPos = WorldHelper.findGraveSpawn(player, initPos);
     if (spawnPos == null || spawnPos.toBlockPos() == null) {
       //found a block but its not air, cant use it
       MessageType.MESSAGE_NO_PLACE_FOR_GRAVE.sendSpecialMessage(player);
@@ -337,10 +337,10 @@ public class PlayerTombEvents {
     DeathHelper.INSTANCE.putLastGrave(player, spawnPos);
     if (ConfigTomb.TOMBLOG.get()) {
       ModTomb.LOGGER.info(MessageType.MESSAGE_NEW_GRAVE.getTranslation()
-          + String.format("(%d, %d, %d) " + spawnPos.dim, spawnPos.x, spawnPos.y, spawnPos.z));
+          + String.format("(%d, %d, %d) " + spawnPos.getDimension(), spawnPos.getX(), spawnPos.getY(), spawnPos.getZ()));
     }
     if (ConfigTomb.TOMBCHAT.get()) {
-      MessageType.MESSAGE_NEW_GRAVE.sendSpecialMessage(player, String.format("(%d, %d, %d) " + spawnPos.dim, spawnPos.x, spawnPos.y, spawnPos.z));
+      MessageType.MESSAGE_NEW_GRAVE.sendSpecialMessage(player, String.format("(%d, %d, %d) " + spawnPos.getDimension(), spawnPos.getX(), spawnPos.getY(), spawnPos.getZ()));
     }
   }
 
