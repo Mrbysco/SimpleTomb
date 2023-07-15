@@ -1,5 +1,9 @@
 package com.lothrazar.simpletomb.block;
 
+import java.util.UUID;
+import java.util.stream.IntStream;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.data.MessageType;
 import com.lothrazar.simpletomb.helper.EntityHelper;
@@ -28,11 +32,6 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.UUID;
-import java.util.stream.IntStream;
 
 public class BlockEntityTomb extends BlockEntity {
 
@@ -87,11 +86,11 @@ public class BlockEntityTomb extends BlockEntity {
         ItemStack stack = inventory.getStackInSlot(i);
         if (!stack.isEmpty()) {
           Containers.dropItemStack(
-                  level,
-                  pos.getX(),
-                  pos.getY(),
-                  pos.getZ(),
-                  inventory.extractItem(i, stack.getCount(), false));
+              level,
+              pos.getX(),
+              pos.getY(),
+              pos.getZ(),
+              inventory.extractItem(i, stack.getCount(), false));
         }
       }
     }
@@ -156,6 +155,7 @@ public class BlockEntityTomb extends BlockEntity {
     return this.deathDate;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void saveAdditional(CompoundTag compound) {
     super.saveAdditional(compound);

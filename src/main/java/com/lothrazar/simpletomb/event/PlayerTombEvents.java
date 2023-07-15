@@ -153,6 +153,7 @@ public class PlayerTombEvents {
           player.getInventory().armor.forEach(stacks::add);
           keepingMap.put(player.getUUID(), stacks);
         }
+        case NONE -> {}
       }
     }
   }
