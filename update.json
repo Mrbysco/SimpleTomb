@@ -2,7 +2,9 @@
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/simple-tomb",
   "promos": {
     "1.18.2-latest": "1.0.14",
-    "1.19-latest": "1.0.14"
+    "1.19-latest": "1.0.14",
+    "1.19.4-latest": "1.2.0",
+    "1.20.1-latest": "1.3.0"
   },
   "1.18.2": {
     "1.0.9":"Ported",
@@ -14,5 +16,8 @@
   },
   "1.19":{
   	"1.0.14":"Ported"
+  },
+  "1.20.1":{
+  	"1.3.0":"Ported to 1.20.1, depends on flib-0.0.7+. Contains pr merged https://github.com/Lothrazar/SimpleTomb/pull/23  Merge pull request #23 from SaintWacko/feature/remove-key-first Remove key before restoring inventory merged PR https://github.com/Lothrazar/SimpleTomb/pull/21  Merge pull request #21 from Mrbysco/pr/keepparts Allow keeping part of the inventory "
   }
 }

@@ -21,7 +21,7 @@ version="${file.jarVersion}" #mandatory
 # A display name for the mod
 displayName="Simple Tombstone" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification <here>
-updateJSONURL="https://raw.githubusercontent.com/Lothrazar/SimpleTomb/trunk/1.19/update.json" #optional
+updateJSONURL="https://raw.githubusercontent.com/Lothrazar/SimpleTomb/trunk/1.20/update.json" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
 displayURL="https://www.curseforge.com/minecraft/mc-mods/simple-tomb" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
@@ -39,18 +39,18 @@ The key is not required to reclaim your tomb, but it will help you find the tomb
 [[dependencies.simpletomb]]
 modId="forge"
 mandatory=true
-versionRange="[46.0.1,)"
+versionRange="[47,)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.simpletomb]]
 modId="minecraft"
 mandatory=true
-versionRange="[1.20,)"
+versionRange="[1.20.1,)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.simpletomb]]
     modId="flib"
     mandatory=true
-    versionRange="[0.0.5,)"
+    versionRange="[0.0.7,)"
     ordering="NONE"
     side="BOTH"
