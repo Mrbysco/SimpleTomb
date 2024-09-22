@@ -1,6 +1,6 @@
 package com.lothrazar.simpletomb.helper;
 
-import javax.annotation.Nullable;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -11,11 +11,11 @@ import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraftforge.common.ToolActions;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+import org.jetbrains.annotations.Nullable;
 
 public class EntityHelper {
 
@@ -25,11 +25,11 @@ public class EntityHelper {
     if (stack.isEmpty()) {
       return false;
     }
-    ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(stack.getItem()); //stack.getItem().getRegistryName();
+    ResourceLocation registryName = BuiltInRegistries.ITEM.getKey(stack.getItem()); //stack.getItem().getRegistryName();
     if (registryName == null) {
       return false;
     }
-    if (EnchantmentHelper.getTagEnchantmentLevel(Enchantments.BINDING_CURSE, stack) > 0) {
+    if (EnchantmentHelper.getTagEnchantmentLevel(player.level().holderOrThrow(Enchantments.BINDING_CURSE), stack) > 0) {
       return false;
     }
     if (stack.getMaxStackSize() == 1) {
@@ -42,7 +42,7 @@ public class EntityHelper {
       }
       //
       if (player.getOffhandItem().isEmpty()) {
-        if (stack.getItem().canPerformAction(stack, ToolActions.SHIELD_BLOCK)) { // && player.setSlot(99, stack.copy())) {
+        if (stack.getItem().canPerformAction(stack, ItemAbilities.SHIELD_BLOCK)) { // && player.setSlot(99, stack.copy())) {
           //          player.setItemInHand(InteractionHand.OFF_HAND, stack.copy());
           player.setItemSlot(EquipmentSlot.OFFHAND, stack.copy());
           //          player.getInventory().setItem(99, stack.copy());

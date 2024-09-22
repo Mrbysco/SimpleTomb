@@ -1,12 +1,9 @@
 package com.lothrazar.simpletomb.item;
 
-import java.util.List;
-import javax.annotation.Nullable;
-import com.lothrazar.library.core.BlockPosDim;
-import com.lothrazar.library.util.LevelWorldUtil;
 import com.lothrazar.simpletomb.ConfigTomb;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.block.BlockTomb;
+import com.lothrazar.simpletomb.data.DeathHelper;
 import com.lothrazar.simpletomb.data.MessageType;
 import com.lothrazar.simpletomb.helper.NBTHelper;
 import com.lothrazar.simpletomb.proxy.ClientUtils;
@@ -14,6 +11,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -29,21 +27,19 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
+
+import java.util.List;
 
 public class GraveKeyItem extends SwordItem {
 
-  private static final String TOMB_POS = "tombPos";
-
   public GraveKeyItem(Item.Properties properties) {
-    super(Tiers.STONE, 3, -2.4F, properties.stacksTo(1));
+    super(Tiers.STONE, properties.stacksTo(1).attributes(SwordItem.createAttributes(Tiers.STONE, 3, -2.4F)));
   }
 
   @Override
-  @OnlyIn(Dist.CLIENT)
+  
   public Component getDescription() {
     return Component.translatable(this.getDescriptionId()).withStyle(ChatFormatting.GOLD);
   }
@@ -51,12 +47,12 @@ public class GraveKeyItem extends SwordItem {
   @Override
   public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int count) {
     if (entity instanceof Player player) {
-      BlockPosDim location = this.getTombPos(stack);
-      if (location == null || location.isOrigin()
-          || !location.getDimension().equalsIgnoreCase(LevelWorldUtil.dimensionToString(level))) {
+      GlobalPos location = this.getTombPos(stack);
+      if (location == null || !location.equals(DeathHelper.ORIGIN) || !location.equals(level.dimension())) {
         return;
       }
-      double distance = location.getDistance(player.blockPosition());
+      BlockPos tombPos = location.pos();
+      double distance = getDistance(tombPos, player.blockPosition());
       boolean canTp = false;
       if (player.isCreative()) {
         canTp = ConfigTomb.TPCREATIVE.get();
@@ -69,8 +65,7 @@ public class GraveKeyItem extends SwordItem {
       if (canTp) {
         if (count <= 1) {
           //teleport happens here
-          BlockPos pos = location.toBlockPos();
-          player.teleportTo(pos.getX(), pos.getY(), pos.getZ());
+          player.teleportTo(tombPos.getX(), tombPos.getY(), tombPos.getZ());
         }
         else if (level.isClientSide) {
           //not done, and can TP
@@ -80,8 +75,15 @@ public class GraveKeyItem extends SwordItem {
     }
   }
 
+  private double getDistance(BlockPos pos, BlockPos pos2) {
+    double deltX = pos.getX() - pos2.getX();
+    double deltY = pos.getY() - pos2.getY();
+    double deltZ = pos.getZ() - pos2.getZ();
+    return Math.sqrt(deltX * deltX + deltY * deltY + deltZ * deltZ);
+  }
+
   @Override
-  public int getUseDuration(ItemStack stack) {
+  public int getUseDuration(ItemStack stack, LivingEntity entity) {
     return 86;
   }
 
@@ -115,42 +117,43 @@ public class GraveKeyItem extends SwordItem {
   }
 
   @Override
-  @OnlyIn(Dist.CLIENT)
-  public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> list, TooltipFlag flag) {
+  
+  public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> list, TooltipFlag tooltipFlag) {
     if (Screen.hasShiftDown()) {
-      BlockPosDim location = this.getTombPos(stack);
+      GlobalPos location = this.getTombPos(stack);
       //      this.addItemPosition(list, this.getTombPos(stack));
       Player player = Minecraft.getInstance().player;
-      if (player != null && !location.isOrigin()) {
+      if (player != null && !location.equals(DeathHelper.ORIGIN)) {
         BlockPos pos = player.blockPosition();
-        int distance = (int) location.getDistance(pos);
+        BlockPos tombPos = location.pos();
+        int distance = (int) getDistance(tombPos, pos);
         list.add(Component.translatable(MessageType.MESSAGE_DISTANCE.getKey(),
-            distance, location.getX(), location.getY(), location.getZ(), location.getDimension())
+            distance, tombPos.getX(), tombPos.getY(), tombPos.getZ(), location.dimension())
             .withStyle(ChatFormatting.DARK_PURPLE));
       }
     }
-    super.appendHoverText(stack, world, list, flag);
+    super.appendHoverText(stack, context, list, tooltipFlag);
   }
 
-  public boolean setTombPos(ItemStack stack, BlockPosDim location) {
-    if (stack.getItem() == this && !location.isOrigin()) {
-      NBTHelper.setLocation(stack, TOMB_POS, location);
+  public boolean setTombPos(ItemStack stack, GlobalPos location) {
+    if (stack.getItem() == this && !location.equals(DeathHelper.ORIGIN)) {
+      NBTHelper.setLocation(stack, location);
       return true;
     }
     return false;
   }
 
-  public BlockPosDim getTombPos(ItemStack stack) {
+  public GlobalPos getTombPos(ItemStack stack) {
     return stack.getItem() == this
-        ? NBTHelper.getLocation(stack, TOMB_POS)
-        : BlockPosDim.ORIGIN;
+        ? NBTHelper.getLocation(stack)
+        : DeathHelper.ORIGIN;
   }
 
   /**
    * Look for any key that matches this Location and remove that key from player
    */
-  public boolean removeKeyForGraveInInventory(Player player, BlockPosDim graveLoc) {
-    IItemHandler itemHandler = player.getCapability(ForgeCapabilities.ITEM_HANDLER, null).orElse(null);
+  public boolean removeKeyForGraveInInventory(Player player, GlobalPos graveLoc) {
+    IItemHandler itemHandler = player.getCapability(Capabilities.ItemHandler.ENTITY, null);
     if (itemHandler != null) {
       for (int i = 0; i < itemHandler.getSlots(); ++i) {
         ItemStack stack = itemHandler.getStackInSlot(i);

@@ -2,26 +2,31 @@ package com.lothrazar.simpletomb.proxy;
 
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.block.RenderTomb;
-import com.lothrazar.simpletomb.event.ClientEvents;
 import com.lothrazar.simpletomb.particle.ParticleCasting;
+import com.lothrazar.simpletomb.particle.ParticleGraveSmoke;
+import com.lothrazar.simpletomb.particle.ParticleGraveSoul;
+import com.lothrazar.simpletomb.particle.ParticleRotatingSmoke;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
 import java.util.function.Predicate;
 
-@OnlyIn(Dist.CLIENT)
+
 public class ClientUtils {
 
-  public static void onClientSetup(final FMLClientSetupEvent event) {
-    MinecraftForge.EVENT_BUS.register(new ClientEvents());
+  public static void registerParticleFactories(RegisterParticleProvidersEvent event) {
+    //    ParticleEngine r = Minecraft.getInstance().particleEngine;
+    event.registerSpriteSet(TombRegistry.GRAVE_SMOKE.get(), ParticleGraveSmoke.Factory::new);
+    event.registerSpriteSet(TombRegistry.ROTATING_SMOKE.get(), ParticleRotatingSmoke.Factory::new);
+    event.registerSpriteSet(TombRegistry.SOUL.get(), ParticleGraveSoul.Factory::new);
+    //    r.register(TombRegistry.GRAVE_SMOKE.get(), ParticleGraveSmoke.Factory::new);
+    //    r.register(TombRegistry.ROTATING_SMOKE.get(), ParticleRotatingSmoke.Factory::new);
+    //    r.register(TombRegistry.SOUL.get(), ParticleGraveSoul.Factory::new);
   }
 
   public static void registerEntityRenders(EntityRenderersEvent.RegisterRenderers event) {

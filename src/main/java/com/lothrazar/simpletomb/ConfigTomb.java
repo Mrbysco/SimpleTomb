@@ -1,15 +1,13 @@
 package com.lothrazar.simpletomb;
 
-import com.lothrazar.library.config.ConfigTemplate;
 import com.lothrazar.simpletomb.data.PartEnum;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
-import net.minecraftforge.common.ForgeConfigSpec.EnumValue;
-import net.minecraftforge.common.ForgeConfigSpec.IntValue;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.BooleanValue;
+import net.neoforged.neoforge.common.ModConfigSpec.IntValue;
 
-public class ConfigTomb extends ConfigTemplate {
+public class ConfigTomb {
 
-  private static final ForgeConfigSpec CONFIG;
+  public static final ModConfigSpec CONFIG;
   public static BooleanValue TOMBENABLED;
   public static BooleanValue KEYGIVEN;
   public static BooleanValue KEYNAMED;
@@ -21,10 +19,10 @@ public class ConfigTomb extends ConfigTemplate {
   public static IntValue VSEARCHRANGE;
   public static IntValue HSEARCHRANGE;
   public static BooleanValue KEYOPENONUSE;
-  public static EnumValue<PartEnum> KEEPPARTS;
+  public static ModConfigSpec.EnumValue<PartEnum> KEEPPARTS;
   static final String WALL = "####################################################################################";
   static {
-    final ForgeConfigSpec.Builder BUILDER = builder();
+    final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
     BUILDER.comment(WALL, "Simple Tomb config", WALL).push(ModTomb.MODID);
     BUILDER.comment(WALL).push("tomb");
     //
@@ -63,9 +61,5 @@ public class ConfigTomb extends ConfigTemplate {
     //
     BUILDER.pop();
     CONFIG = BUILDER.build();
-  }
-
-  public ConfigTomb() {
-    CONFIG.setConfig(setup(ModTomb.MODID));
   }
 }

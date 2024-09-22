@@ -1,4 +1,4 @@
-# This is an example mods.toml file. It contains the data relating to the loading mods.
+# This is an example neoforge.mods.toml file. It contains the data relating to the loading mods.
 # There are several mandatory fields (#mandatory), and many more that are optional (#optional).
 # The overall format is standard TOML format, v0.5.0.
 # Note that there are a couple of TOML lists in this file.
@@ -9,7 +9,7 @@ modLoader="javafml" #mandatory
 license="LGPL2"
 
 # A version range to match for said mod loader - for regular FML @Mod it will be the forge version
-loaderVersion="[46,)" #mandatory (26 is current forge version)
+loaderVersion="[4,)" #mandatory (26 is current forge version)
 # A URL to refer people to when problems occur with this mod
 issueTrackerURL="https://github.com/Lothrazar/SimpleTomb/issues" #optional
 # A list of mods - how many allowed here is determined by the individual mod loader
@@ -25,7 +25,7 @@ updateJSONURL="https://raw.githubusercontent.com/Lothrazar/SimpleTomb/trunk/1.20
 # A URL for the "homepage" for this mod, displayed in the mod UI
 displayURL="https://www.curseforge.com/minecraft/mc-mods/simple-tomb" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
-logoFile="logoFile.png" #optional
+#logoFile="logoFile.png" #optional
 # A text field displayed in the mod UI
 credits="Corail31" #optional
 # A text field displayed in the mod UI
@@ -37,20 +37,14 @@ The key is not required to reclaim your tomb, but it will help you find the tomb
 '''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.simpletomb]]
-modId="forge"
-mandatory=true
-versionRange="[47,)"
+modId="neoforge"
+type="required"
+versionRange="[21.1.1,]"
 ordering="NONE"
 side="BOTH"
 [[dependencies.simpletomb]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.20.1,)"
+type="required"
+versionRange="[1.21,1.22)"
 ordering="NONE"
 side="BOTH"
-[[dependencies.simpletomb]]
-    modId="flib"
-    mandatory=true
-    versionRange="[0.0.7,)"
-    ordering="NONE"
-    side="BOTH"

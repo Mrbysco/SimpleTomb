@@ -1,9 +1,5 @@
 package com.lothrazar.simpletomb.block;
 
-import java.util.UUID;
-import java.util.stream.IntStream;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.data.MessageType;
 import com.lothrazar.simpletomb.helper.EntityHelper;
@@ -12,6 +8,7 @@ import com.lothrazar.simpletomb.proxy.ClientUtils;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -23,15 +20,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.ItemStackHandler;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
+import java.util.stream.IntStream;
 
 public class BlockEntityTomb extends BlockEntity {
 
@@ -41,7 +36,7 @@ public class BlockEntityTomb extends BlockEntity {
     super(TombRegistry.TOMBSTONE_BLOCK_ENTITY.get(), pos, blockState);
   }
 
-  private LazyOptional<IItemHandler> handler = LazyOptional.of(this::createHandler);
+  private ItemStackHandler handler = new ItemStackHandler(120);
   protected String ownerName = "";
   protected long deathDate;
   public int timer = 0;
@@ -51,24 +46,19 @@ public class BlockEntityTomb extends BlockEntity {
   //but in normal survival gameplay, it stays true and thus requires owners to access their graves
   private boolean onlyOwnersAccess = true;
 
-  private IItemHandler createHandler() {
-    return new ItemStackHandler(120);
-  }
-
   public void giveInventory(@Nullable Player player) {
-    IItemHandler inventory = handler.orElse(null);
     if (!this.level.isClientSide && player != null && !(player instanceof FakePlayer)) {
       //
-      for (int i = inventory.getSlots() - 1; i >= 0; --i) {
-        if (EntityHelper.autoEquip(inventory.getStackInSlot(i), player)) {
-          inventory.extractItem(i, 64, false);
+      for (int i = handler.getSlots() - 1; i >= 0; --i) {
+        if (EntityHelper.autoEquip(handler.getStackInSlot(i), player)) {
+          handler.extractItem(i, 64, false);
         }
       }
-      IntStream.range(0, inventory.getSlots()).forEach(ix -> {
-        ItemStack stack = inventory.getStackInSlot(ix);
+      IntStream.range(0, handler.getSlots()).forEach(ix -> {
+        ItemStack stack = handler.getStackInSlot(ix);
         if (!stack.isEmpty()) {
           ItemHandlerHelper.giveItemToPlayer(player, stack.copy());
-          inventory.extractItem(ix, 64, false);
+          handler.extractItem(ix, 64, false);
         }
       });
       this.removeGraveBy(player);
@@ -80,17 +70,16 @@ public class BlockEntityTomb extends BlockEntity {
   }
 
   public void dropInventory(Level level, BlockPos pos) {
-    IItemHandler inventory = handler.orElse(null);
     if (this.level != null && !this.level.isClientSide) {
-      for (int i = 0; i < inventory.getSlots(); ++i) {
-        ItemStack stack = inventory.getStackInSlot(i);
+      for (int i = 0; i < handler.getSlots(); ++i) {
+        ItemStack stack = handler.getStackInSlot(i);
         if (!stack.isEmpty()) {
           Containers.dropItemStack(
               level,
               pos.getX(),
               pos.getY(),
               pos.getZ(),
-              inventory.extractItem(i, stack.getCount(), false));
+                  handler.extractItem(i, stack.getCount(), false));
         }
       }
     }
@@ -131,18 +120,6 @@ public class BlockEntityTomb extends BlockEntity {
     return this.ownerId.equals(owner.getUUID());
   }
 
-  @Override
-  public AABB getRenderBoundingBox() {
-    double renderExtension = 1.0D;
-    return new AABB(
-        this.worldPosition.getX() - renderExtension,
-        this.worldPosition.getY() - renderExtension,
-        this.worldPosition.getZ() - renderExtension,
-        this.worldPosition.getX() + 1 + renderExtension,
-        this.worldPosition.getY() + 1 + renderExtension,
-        this.worldPosition.getZ() + 1 + renderExtension);
-  }
-
   String getOwnerName() {
     return this.ownerName;
   }
@@ -155,56 +132,46 @@ public class BlockEntityTomb extends BlockEntity {
     return this.deathDate;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public void saveAdditional(CompoundTag compound) {
-    super.saveAdditional(compound);
-    compound.putString("ownerName", this.ownerName);
-    compound.putLong("deathDate", this.deathDate);
-    compound.putInt("countTicks", this.timer);
+  protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    super.saveAdditional(tag, registries);
+    tag.putString("ownerName", this.ownerName);
+    tag.putLong("deathDate", this.deathDate);
+    tag.putInt("countTicks", this.timer);
     if (this.ownerId != null) {
-      compound.putUUID("ownerid", this.ownerId);
+      tag.putUUID("ownerid", this.ownerId);
     }
-    handler.ifPresent(h -> {
-      CompoundTag ct = ((INBTSerializable<CompoundTag>) h).serializeNBT();
-      compound.put("inv", ct);
-    });
-    compound.putBoolean("onlyOwnersAccess", this.onlyOwnersAccess);
+    if (handler != null) {
+      tag.put("inv", handler.serializeNBT(registries));
+    }
+    tag.putBoolean("onlyOwnersAccess", this.onlyOwnersAccess);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public void load(CompoundTag compound) {
+  public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries) {
     this.ownerName = compound.getString("ownerName");
     this.deathDate = compound.getLong("deathDate");
     this.timer = compound.getInt("countTicks");
     CompoundTag invTag = compound.getCompound("inv");
-    handler.ifPresent(h -> ((INBTSerializable<CompoundTag>) h).deserializeNBT(invTag));
+    if (handler != null) {
+        handler.deserializeNBT(registries, invTag);
+    }
     if (compound.hasUUID("ownerid")) {
       this.ownerId = compound.getUUID("ownerid");
     }
     this.onlyOwnersAccess = compound.getBoolean("onlyOwnersAccess");
-    super.load(compound);
+    super.loadAdditional(compound, registries);
+  }
+
+  public ItemStackHandler getHandler(@Nullable Direction direction) {
+    return handler;
   }
 
   @Override
-  public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, Direction side) {
-    if (cap == ForgeCapabilities.ITEM_HANDLER) {
-      return handler.cast();
-    }
-    return super.getCapability(cap, side);
-  }
-
-  @Override
-  public void invalidateCaps() {
-    handler.invalidate();
-    super.invalidateCaps();
-  }
-
-  @Override
-  public CompoundTag getUpdateTag() {
+  public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
     CompoundTag compound = new CompoundTag();
-    super.saveAdditional(compound);
+    this.saveAdditional(compound, provider);
     compound.putString("ownerName", this.ownerName);
     compound.putLong("deathDate", this.deathDate);
     compound.putInt("countTicks", this.timer);
@@ -222,8 +189,8 @@ public class BlockEntityTomb extends BlockEntity {
   }
 
   @Override
-  public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-    load(pkt.getTag());
+  public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider provider) {
+    loadAdditional(pkt.getTag(), provider);
   }
 
   public static void clientTick(Level level, BlockPos blockPos, BlockState blockState, BlockEntityTomb tile) {

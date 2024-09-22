@@ -1,21 +1,17 @@
 package com.lothrazar.simpletomb.particle;
 
-import java.util.function.Predicate;
-import com.lothrazar.library.particle.AbstractSingleQuadParticle;
-import com.lothrazar.library.util.RenderUtil;
 import com.lothrazar.simpletomb.ModTomb;
 import com.lothrazar.simpletomb.helper.WorldHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
-public class ParticleCasting extends AbstractSingleQuadParticle {
+import java.util.function.Predicate;
 
-  private static final ResourceLocation COMMON_TEXTURE = new ResourceLocation(ModTomb.MODID, "textures/particle/casting.png");
+public class ParticleCasting extends CustomParticle {
+
+  private static final ResourceLocation COMMON_TEXTURE = ResourceLocation.fromNamespaceAndPath(ModTomb.MODID, "textures/particle/casting.png");
   private final LivingEntity caster;
   private final Predicate<LivingEntity> predic;
   private final double radius = 1.1;
@@ -36,7 +32,7 @@ public class ParticleCasting extends AbstractSingleQuadParticle {
     this.quadSize = world.random.nextFloat() * 0.1f + 0.15f;
     this.angle = angle + WorldHelper.getRandom(world.random, -0.25, 0.25);
     this.roll = world.random.nextFloat() * (float) (2d * Math.PI);
-    float[] color = RenderUtil.getRGBColor3F(14937088);
+    float[] color = WorldHelper.getRGBColor3F(14937088);
     this.colorR = color[0];
     this.colorG = color[1];
     this.colorB = color[2];
@@ -79,7 +75,7 @@ public class ParticleCasting extends AbstractSingleQuadParticle {
   }
 
   @Override
-  public ResourceLocation getTexture() {
+  ResourceLocation getTexture() {
     return COMMON_TEXTURE;
   }
 }

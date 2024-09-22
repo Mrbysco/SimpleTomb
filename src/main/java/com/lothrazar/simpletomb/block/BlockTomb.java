@@ -1,15 +1,15 @@
 package com.lothrazar.simpletomb.block;
 
-import com.lothrazar.library.block.BlockFlib;
-import com.lothrazar.library.block.EntityBlockFlib;
-import com.lothrazar.library.core.BlockPosDim;
 import com.lothrazar.simpletomb.ModTomb;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.data.DeathHelper;
 import com.lothrazar.simpletomb.data.MessageType;
 import com.lothrazar.simpletomb.helper.EntityHelper;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -30,9 +30,15 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class BlockTomb extends EntityBlockFlib {
+public class BlockTomb extends BaseEntityBlock {
+  public static final MapCodec<BlockTomb> CODEC = RecordCodecBuilder.mapCodec(
+          instance -> instance.group(
+                          propertiesCodec(),
+                          ModelTomb.CODEC.fieldOf("model").forGetter(BlockTomb::getGraveModel)
+          )
+          .apply(instance, BlockTomb::new)
+  );
 
-  BaseEntityBlock x;
   public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
   public static final IntegerProperty MODEL_TEXTURE = IntegerProperty.create("model_texture", 0, 1);
   public static final BooleanProperty IS_ENGRAVED = BooleanProperty.create("is_engraved");
@@ -41,9 +47,18 @@ public class BlockTomb extends EntityBlockFlib {
   protected final ModelTomb graveModel;
 
   public BlockTomb(Block.Properties properties, ModelTomb graveModel) {
-    super(properties.noOcclusion().strength(-1.0F, 3600000.0F), new BlockFlib.Settings().noTooltip());
+    super(properties.noOcclusion().strength(-1.0F, 3600000.0F));
     this.graveModel = graveModel;
     this.name = graveModel.getSerializedName();
+  }
+
+  private ModelTomb getGraveModel() {
+    return this.graveModel;
+  }
+
+  @Override
+  public MapCodec<BlockTomb> codec() {
+    return CODEC;
   }
 
   @Override
@@ -105,7 +120,7 @@ public class BlockTomb extends EntityBlockFlib {
         MessageType.MESSAGE_OPEN_GRAVE_NEED_OWNER.sendSpecialMessage(player);
         return;
       }
-      TombRegistry.GRAVE_KEY.get().removeKeyForGraveInInventory(player, new BlockPosDim(pos, level));
+      TombRegistry.GRAVE_KEY.get().removeKeyForGraveInInventory(player, new GlobalPos(level.dimension(), pos));
       //either you are the owner, or it has setting that says anyone can access
       tile.giveInventory(player);
       //clear saved loc

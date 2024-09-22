@@ -6,6 +6,7 @@ public enum ModelTomb implements StringRepresentable {
 
   GRAVE_SIMPLE("grave_simple"), GRAVE_NORMAL("grave_normal"), GRAVE_CROSS("grave_cross"), GRAVE_TOMB("tombstone");
 
+  public static final StringRepresentable.EnumCodec<ModelTomb> CODEC = StringRepresentable.fromEnum(ModelTomb::values);
   private final String name;
 
   ModelTomb(String name) {

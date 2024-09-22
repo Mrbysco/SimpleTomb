@@ -27,7 +27,7 @@ public class CuriosHelper {
         for (int s = 0; s < current.getSlots(); s++) {
           // Do the thing
           stack = current.insertItem(s, stack, false);
-          ModTomb.LOGGER.info(s + " result " + stack);
+	        ModTomb.LOGGER.info("{} result {}", s, stack);
           if (stack.isEmpty()) {
             return true;
           }

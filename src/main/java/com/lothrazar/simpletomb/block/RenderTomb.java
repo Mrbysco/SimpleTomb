@@ -1,9 +1,7 @@
 package com.lothrazar.simpletomb.block;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import com.lothrazar.library.util.TimeUtil;
 import com.lothrazar.simpletomb.data.MessageType;
+import com.lothrazar.simpletomb.helper.WorldHelper;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -19,22 +17,27 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.world.phys.AABB;
 
-@OnlyIn(Dist.CLIENT)
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+
 public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
 
-  private static final ResourceLocation SKELETON_HEAD = new ResourceLocation("minecraft", "textures/entity/skeleton/skeleton.png");
+  private static final ResourceLocation SKELETON_HEAD = ResourceLocation.withDefaultNamespace("textures/entity/skeleton/skeleton.png");
   private final Font font;
 
   public RenderTomb(BlockEntityRendererProvider.Context cx) {
     this.font = cx.getFont();
   }
 
+  private static final String TIME_FORMAT = "HH:mm:ss";
+  private static final String DATE_FORMAT = "yyyy/MM/dd";
+
   @Override
   public void render(BlockEntityTomb te, float partialTicks, PoseStack poseStack,
-      MultiBufferSource iRenderTypeBuffer, int light, int destroyStage) {
+      MultiBufferSource bufferSource, int light, int destroyStage) {
     if (te == null) {
       return;
     }
@@ -42,13 +45,12 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
       return;
     }
     BlockState knownState = te.getLevel().getBlockState(te.getBlockPos());
-    if (!(knownState.getBlock() instanceof BlockTomb)) {
+    if (!(knownState.getBlock() instanceof BlockTomb grave)) {
       return;
     }
     Direction facing = knownState.getValue(BlockTomb.FACING);
-    BlockTomb grave = (BlockTomb) knownState.getBlock();
     ModelTomb graveModel = grave.getGraveType();
-    renderHalloween(poseStack, iRenderTypeBuffer, graveModel, facing, light, TimeUtil.isNight(te.getLevel()));
+    renderHalloween(poseStack, bufferSource, graveModel, facing, light, WorldHelper.isNight(te.getLevel()));
     light = 0xf000f0;
     int rotationIndex;
     float modX = 0.5F, modY, modZ = 0.5F;
@@ -131,32 +133,32 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
     Font fontRender = this.font;
     int textColor = 0xFFFFFFFF;
     // rip message
-    showString(ChatFormatting.BOLD + MessageType.MESSAGE_RIP.getTranslation(), poseStack, iRenderTypeBuffer, fontRender, 0,
+    showString(ChatFormatting.BOLD + MessageType.MESSAGE_RIP.getTranslation(), poseStack, bufferSource, fontRender, 0,
         textColor, 0.007f, light);
     // owner message
-    showString(ChatFormatting.BOLD + te.getOwnerName(), poseStack, iRenderTypeBuffer, fontRender, 11, textColor, 0.005f, light);
+    showString(ChatFormatting.BOLD + te.getOwnerName(), poseStack, bufferSource, fontRender, 11, textColor, 0.005f, light);
     // death date message
     float scaleForDate = 0.004f;
     // time goes 72 times faster than real time
     long days = te.timer / 24000; // TODO incorrect, tiles don't always tick, store gametime
     String dateString = MessageType.MESSAGE_DAY.getTranslation(days);
-    showString(ChatFormatting.BOLD + dateString, poseStack, iRenderTypeBuffer, fontRender, 20, textColor, scaleForDate, light);
+    showString(ChatFormatting.BOLD + dateString, poseStack, bufferSource, fontRender, 20, textColor, scaleForDate, light);
     Date date = new Date(te.getOwnerDeathTime());
-    String fdateString = new SimpleDateFormat(TimeUtil.DATE_FORMAT).format(date);
-    String timeString = new SimpleDateFormat(TimeUtil.TIME_FORMAT).format(date);
-    showString(ChatFormatting.BOLD + fdateString, poseStack, iRenderTypeBuffer, fontRender, 36, textColor, scaleForDate, light);
-    showString(ChatFormatting.BOLD + timeString, poseStack, iRenderTypeBuffer, fontRender, 46, textColor, scaleForDate, light);
+    String fdateString = new SimpleDateFormat(DATE_FORMAT).format(date);
+    String timeString = new SimpleDateFormat(TIME_FORMAT).format(date);
+    showString(ChatFormatting.BOLD + fdateString, poseStack, bufferSource, fontRender, 36, textColor, scaleForDate, light);
+    showString(ChatFormatting.BOLD + timeString, poseStack, bufferSource, fontRender, 46, textColor, scaleForDate, light);
     poseStack.popPose();
   }
 
-  private void showString(String content, PoseStack matrixStack, MultiBufferSource iRenderTypeBuffer, Font fontRenderer, int posY, int color, float scale, int light) {
-    matrixStack.pushPose();
-    matrixStack.scale(scale, scale, scale);
-    fontRenderer.drawInBatch(content, -fontRenderer.width(content) / 2, posY - 30, color, false, matrixStack.last().pose(), iRenderTypeBuffer, Font.DisplayMode.NORMAL, 0, light);
-    matrixStack.popPose();
+  private void showString(String content, PoseStack poseStack, MultiBufferSource bufferSource, Font font, int posY, int color, float scale, int light) {
+    poseStack.pushPose();
+    poseStack.scale(scale, scale, scale);
+    font.drawInBatch(content, (float) -font.width(content) / 2, posY - 30, color, false, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, light);
+    poseStack.popPose();
   }
 
-  private void renderHalloween(PoseStack matrixStack, MultiBufferSource iRenderTypeBuffer, ModelTomb graveModel, Direction facing, int light, boolean isNight) {
+  private void renderHalloween(PoseStack poseStack, MultiBufferSource bufferSource, ModelTomb graveModel, Direction facing, int light, boolean isNight) {
     //    RenderSystem.enableRescaleNormal();
     RenderSystem.disableCull();
     //    RenderSystem.enableAlphaTest();
@@ -184,18 +186,18 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
         decoY += 0.1f;
       break;
     }
-    Minecraft.getInstance().textureManager.bindForSetup(SKELETON_HEAD);
-    matrixStack.pushPose();
-    matrixStack.translate(decoX, decoY, decoZ);
-    matrixStack.mulPose(Axis.YP.rotationDegrees(facing.toYRot() + (facing == Direction.SOUTH || facing == Direction.NORTH ? 180 : 0)));
+    Minecraft.getInstance().getTextureManager().bindForSetup(SKELETON_HEAD);
+    poseStack.pushPose();
+    poseStack.translate(decoX, decoY, decoZ);
+    poseStack.mulPose(Axis.YP.rotationDegrees(facing.toYRot() + (facing == Direction.SOUTH || facing == Direction.NORTH ? 180 : 0)));
     if (graveModel == ModelTomb.GRAVE_NORMAL || graveModel == ModelTomb.GRAVE_SIMPLE) {
-      matrixStack.scale(0.2f, 0.2f, 0.2f);
+      poseStack.scale(0.2f, 0.2f, 0.2f);
       ItemStack stack = new ItemStack(isNight ? Blocks.JACK_O_LANTERN : Blocks.PUMPKIN);
-      Minecraft.getInstance().getItemRenderer().render(stack, ItemDisplayContext.NONE, false, matrixStack, iRenderTypeBuffer, 15728880,
+      Minecraft.getInstance().getItemRenderer().render(stack, ItemDisplayContext.NONE, false, poseStack, bufferSource, 15728880,
           net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, Minecraft.getInstance().getItemRenderer().getModel(stack, null, null, 0));
     }
     else {
-      matrixStack.scale(0.3f, 0.3f, 0.3f);
+      poseStack.scale(0.3f, 0.3f, 0.3f);
       //      SkullBlock.Type skullblock$type = ((AbstractSkullBlock)block).getType();
       //      SkullModelBase skullmodelbase = this.skullModels.get(skullblock$type);
       //      RenderType rendertype = SkullBlockRenderer.getRenderType(skullblock$type, gameprofile);
@@ -203,7 +205,19 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
       // TODO:::
       //      SkullBlockRenderer.renderSkull(null, 1f, SkullBlock.Types.SKELETON, null, 0f, matrixStack, iRenderTypeBuffer, isNight ? 0xf000f0 : light);
     }
-    matrixStack.popPose();
+    poseStack.popPose();
     //    RenderSystem.popMatrix();
+  }
+
+  @Override
+  public AABB getRenderBoundingBox(BlockEntityTomb blockEntity) {
+    double renderExtension = 1.0D;
+    return new AABB(
+        blockEntity.getBlockPos().getX() - renderExtension,
+        blockEntity.getBlockPos().getY() - renderExtension,
+        blockEntity.getBlockPos().getZ() - renderExtension,
+        blockEntity.getBlockPos().getX() + 1 + renderExtension,
+        blockEntity.getBlockPos().getY() + 1 + renderExtension,
+        blockEntity.getBlockPos().getZ() + 1 + renderExtension);
   }
 }

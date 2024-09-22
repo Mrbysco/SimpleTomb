@@ -5,8 +5,7 @@ bin
 .metadata
 .classpath
 .project
-logs
-libs/
+
 # idea
 out
 *.ipr
@@ -21,6 +20,7 @@ build
 # other
 eclipse
 run
+runs
+run-data
 
-# Files from Forge MDK
-forge*changelog.txt
+repo

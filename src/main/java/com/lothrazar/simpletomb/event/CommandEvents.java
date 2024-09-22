@@ -1,8 +1,5 @@
 package com.lothrazar.simpletomb.event;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import com.lothrazar.library.core.BlockPosDim;
 import com.lothrazar.simpletomb.ModTomb;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.block.BlockEntityTomb;
@@ -24,23 +21,25 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class CommandEvents {
 
@@ -102,7 +101,7 @@ public class CommandEvents {
     PlayerTombRecords found = ModTomb.GLOBAL.findGrave(target.getId());
     if (found != null && found.playerGraves.size() > 0) {
       for (int i = 0; i < found.playerGraves.size(); i++) {
-        MutableComponent msg = Component.translatable(found.toDisplayString(i));
+        MutableComponent msg = Component.translatable(found.toDisplayString(i, ctx.getSource().registryAccess()));
         msg.setStyle(Style.EMPTY.withColor(ChatFormatting.GOLD));
         ctx.getSource().sendSuccess(() -> msg, false);
       }
@@ -120,10 +119,10 @@ public class CommandEvents {
     if (found != null) {
       CompoundTag grave = found.playerGraves.get(index);
       if (grave == null) {
-        ModTomb.LOGGER.error("Invalid grave index " + index + "; try between 0 and  " + (found.playerGraves.size() - 1));
+	      ModTomb.LOGGER.error("Invalid grave index {}; try between 0 and  {}", index, found.playerGraves.size() - 1);
         return 1;
       }
-      BlockPosDim spawnPos = new BlockPosDim(PlayerTombRecords.getPos(grave), PlayerTombRecords.getDim(grave));
+      GlobalPos spawnPos = new GlobalPos(PlayerTombRecords.getDim(grave), PlayerTombRecords.getPos(grave));
       ItemStack key = new ItemStack(TombRegistry.GRAVE_KEY.get());
       TombRegistry.GRAVE_KEY.get().setTombPos(key, spawnPos);
       PlayerTombEvents.putKeyName(target.getName(), key);
@@ -142,24 +141,23 @@ public class CommandEvents {
     if (found != null) {
       CompoundTag grave = found.playerGraves.get(index);
       if (grave == null) {
-        ModTomb.LOGGER.error("Invalid grave index " + index + "; try between 0 and  " + (found.playerGraves.size() - 1));
+	      ModTomb.LOGGER.error("Invalid grave index {}; try between 0 and  {}", index, found.playerGraves.size() - 1);
         return 1;
       }
       BlockPos pos = PlayerTombRecords.getPos(grave);
-      String dim = PlayerTombRecords.getDim(grave);
+      ResourceKey<Level> dim = PlayerTombRecords.getDim(grave);
       //      ModTomb.LOGGER.error("found  at" + pos + " in " + dim);
-      List<ItemStack> drops = PlayerTombRecords.getDrops(grave);
+      List<ItemStack> drops = PlayerTombRecords.getDrops(grave, ctx.getSource().registryAccess());
       //      ModTomb.LOGGER.error("items contained " + drops.size());
       //TODO: is this dupe code from location class?
-      ResourceKey<Level> dimKey = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(dim));
-      ServerLevel targetWorld = ctx.getSource().getLevel().getServer().getLevel(dimKey);
+      ServerLevel targetWorld = ctx.getSource().getLevel().getServer().getLevel(dim);
       BlockState state = PlayerTombEvents.getRandomGrave(targetWorld, Direction.NORTH);
       boolean wasPlaced = WorldHelper.placeGrave(targetWorld, pos, state);
       if (wasPlaced) {
         //fill it up
         BlockEntityTomb tile = (BlockEntityTomb) targetWorld.getBlockEntity(pos);
         tile.initTombstoneOwner(target);
-        IItemHandler itemHandler = tile.getCapability(ForgeCapabilities.ITEM_HANDLER, null).orElse(null);
+        IItemHandler itemHandler = targetWorld.getCapability(Capabilities.ItemHandler.BLOCK, pos, null);
         //        ItemHandlerHelper.ins
         for (ItemStack d : drops) {
           ItemHandlerHelper.insertItemStacked(itemHandler, d.copy(), false);

@@ -1,6 +1,5 @@
 package com.lothrazar.simpletomb.particle;
 
-import com.lothrazar.library.particle.TransparentParticle;
 import com.lothrazar.simpletomb.helper.WorldHelper;
 import com.lothrazar.simpletomb.proxy.ClientUtils;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -10,10 +9,8 @@ import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.RandomSource;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-@OnlyIn(Dist.CLIENT)
+
 public class ParticleGhost extends TransparentParticle {
 
   private final SpriteSet spriteSet;
@@ -71,7 +68,7 @@ public class ParticleGhost extends TransparentParticle {
 
     @Override
     public Particle createParticle(SimpleParticleType type, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
-      RandomSource rand = (world == null) ? RandomSource.create(0) : world.random;
+      RandomSource rand = (world == null) ? RandomSource.createThreadSafe() : world.random;
       return new ParticleGhost(this.spriteSet, world, x, y, z, WorldHelper.getRandom(rand, -0.05d, 0.05d), 0d, WorldHelper.getRandom(rand, -0.05d, 0.05d));
     }
   }

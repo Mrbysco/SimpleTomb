@@ -2,10 +2,15 @@ package com.lothrazar.simpletomb.data;
 
 import com.lothrazar.simpletomb.ModTomb;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,18 +54,19 @@ public class PlayerTombRecords {
   }
 
   public static BlockPos getPos(CompoundTag grave) {
-    return NbtUtils.readBlockPos(grave.getCompound("pos"));
+    return NbtUtils.readBlockPos(grave, "pos").get();
   }
 
-  public static String getDim(CompoundTag grave) {
-    return grave.getString("dimension");
+  public static ResourceKey<Level> getDim(CompoundTag grave) {
+    ResourceLocation dim = ResourceLocation.parse(grave.getString("dim"));
+    return ResourceKey.create(Registries.DIMENSION, dim);
   }
 
-  public static List<ItemStack> getDrops(CompoundTag grave) {
+  public static List<ItemStack> getDrops(CompoundTag grave, HolderLookup.Provider provider) {
     ListTag drops = grave.getList("drops", 10);
     List<ItemStack> done = new ArrayList<ItemStack>();
     for (int i = 0; i < drops.size(); i++) {
-      done.add(ItemStack.of(drops.getCompound(i)));
+      done.add(ItemStack.parseOptional(provider, drops.getCompound(i)));
     }
     return done;
   }
@@ -76,8 +82,8 @@ public class PlayerTombRecords {
     return "" + pos.getX() + ", " + pos.getY() + ", " + pos.getZ();
   }
 
-  public String toDisplayString(int i) {
+  public String toDisplayString(int i, HolderLookup.Provider provider) {
     CompoundTag gd = getGrave(i);
-    return String.format("[%d] (%s) (%s) {%d}", i, getDim(gd), getCoordinatesAsString(getPos(gd)), getDrops(gd).size());
+    return String.format("[%d] (%s) (%s) {%d}", i, getDim(gd), getCoordinatesAsString(getPos(gd)), getDrops(gd, provider).size());
   }
 }

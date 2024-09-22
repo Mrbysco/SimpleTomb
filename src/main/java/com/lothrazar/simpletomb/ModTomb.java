@@ -1,17 +1,18 @@
 package com.lothrazar.simpletomb;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.lothrazar.simpletomb.event.ClientEvents;
 import com.lothrazar.simpletomb.event.CommandEvents;
 import com.lothrazar.simpletomb.event.PlayerTombEvents;
 import com.lothrazar.simpletomb.proxy.ClientUtils;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @Mod(ModTomb.MODID)
 public class ModTomb {
@@ -20,22 +21,24 @@ public class ModTomb {
   public static final String MODID = "simpletomb";
   public static final Logger LOGGER = LogManager.getLogger();
 
-  public ModTomb() {
-    new ConfigTomb();
-    IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+  public ModTomb(IEventBus eventBus, Dist dist, ModContainer container) {
+    container.registerConfig(ModConfig.Type.COMMON, ConfigTomb.CONFIG, MODID + ".toml");
     eventBus.addListener(this::setup);
+    TombComponents.COMPONENT_TYPE.register(eventBus);
     TombRegistry.BLOCKS.register(eventBus);
     TombRegistry.ITEMS.register(eventBus);
     TombRegistry.BLOCK_ENTITIES.register(eventBus);
     TombRegistry.PARTICLE_TYPES.register(eventBus);
-    MinecraftForge.EVENT_BUS.register(new CommandEvents());
-    DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-      eventBus.addListener(ClientUtils::onClientSetup);
+    eventBus.addListener(TombRegistry::registerCapabilities);
+    NeoForge.EVENT_BUS.register(new CommandEvents());
+    if (dist.isClient()) {
       eventBus.addListener(ClientUtils::registerEntityRenders);
-    });
+      eventBus.addListener(ClientUtils::registerParticleFactories);
+      NeoForge.EVENT_BUS.addListener(ClientEvents::renderEvent);
+    }
   }
 
   private void setup(final FMLCommonSetupEvent event) {
-    MinecraftForge.EVENT_BUS.register(GLOBAL);
+    NeoForge.EVENT_BUS.register(GLOBAL);
   }
 }
