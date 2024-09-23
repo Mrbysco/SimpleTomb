@@ -19,6 +19,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -34,7 +35,7 @@ public class BlockTomb extends BaseEntityBlock {
   public static final MapCodec<BlockTomb> CODEC = RecordCodecBuilder.mapCodec(
           instance -> instance.group(
                           propertiesCodec(),
-                          ModelTomb.CODEC.fieldOf("model").forGetter(BlockTomb::getGraveModel)
+                          ModelTomb.CODEC.fieldOf("model").forGetter(BlockTomb::getGraveType)
           )
           .apply(instance, BlockTomb::new)
   );
@@ -52,8 +53,9 @@ public class BlockTomb extends BaseEntityBlock {
     this.name = graveModel.getSerializedName();
   }
 
-  private ModelTomb getGraveModel() {
-    return this.graveModel;
+  @Override
+  public RenderShape getRenderShape(BlockState state) {
+    return RenderShape.MODEL;
   }
 
   @Override
@@ -62,7 +64,7 @@ public class BlockTomb extends BaseEntityBlock {
   }
 
   @Override
-  public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+  public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
     return GROUND;
   }
 
@@ -76,7 +78,7 @@ public class BlockTomb extends BaseEntityBlock {
   }
 
   @Override
-  public boolean dropFromExplosion(Explosion explosionIn) {
+  public boolean dropFromExplosion(Explosion explosion) {
     return false;
   }
 
