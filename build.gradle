@@ -76,7 +76,9 @@ dependencies {
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
     localRuntime "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
-
+    //  localRuntime "curse.maven:artifacts-312353:5624722"
+    //  localRuntime "curse.maven:architectury-api-419699:5553800"
+    //  localRuntime "curse.maven:cloth-config-348521:5729127"
     //  implementation "curse.maven:cyclic-239286:3188762"
     //  implementation "curse.maven:cosmetic-armor-reworked-237307:3205904"
     //  implementation "curse.maven:cofg-core-69162:3249453"
@@ -94,7 +96,6 @@ repositories {
         name = "OctoStudios - curios continuation"
         url = uri("https://maven.octo-studios.com/releases")
     }
-    maven { url = 'https://maven.blamejared.com' }
     maven {
         url "https://cursemaven.com"
         content {
