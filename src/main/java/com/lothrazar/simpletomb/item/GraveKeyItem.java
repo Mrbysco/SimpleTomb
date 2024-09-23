@@ -6,6 +6,7 @@ import com.lothrazar.simpletomb.block.BlockTomb;
 import com.lothrazar.simpletomb.data.DeathHelper;
 import com.lothrazar.simpletomb.data.MessageType;
 import com.lothrazar.simpletomb.helper.NBTHelper;
+import com.lothrazar.simpletomb.helper.WorldHelper;
 import com.lothrazar.simpletomb.proxy.ClientUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -105,7 +106,7 @@ public class GraveKeyItem extends SwordItem {
   }
 
   @Override
-  public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+  public InteractionResultHolder<ItemStack> use(Level level, Player playerIn, InteractionHand handIn) {
     ItemStack itemstack = playerIn.getItemInHand(handIn);
     playerIn.startUsingItem(handIn);
     return InteractionResultHolder.success(itemstack);
@@ -128,7 +129,7 @@ public class GraveKeyItem extends SwordItem {
         BlockPos tombPos = location.pos();
         int distance = (int) getDistance(tombPos, pos);
         list.add(Component.translatable(MessageType.MESSAGE_DISTANCE.getKey(),
-            distance, tombPos.getX(), tombPos.getY(), tombPos.getZ(), location.dimension())
+            distance, tombPos.getX(), tombPos.getY(), tombPos.getZ(), WorldHelper.getDimensionName(location.dimension()))
             .withStyle(ChatFormatting.DARK_PURPLE));
       }
     }

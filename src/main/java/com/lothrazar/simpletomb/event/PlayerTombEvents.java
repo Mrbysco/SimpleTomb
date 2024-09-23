@@ -57,7 +57,7 @@ import java.util.UUID;
 
 public class PlayerTombEvents {
 
-  public Map<UUID, PlayerTombRecords> grv = new HashMap<>();
+  public final Map<UUID, PlayerTombRecords> grv = new HashMap<>();
   private static final String TOMB_FILE_EXT = ".mctomb";
   private static final String TB_SOULBOUND_STACKS = "tb_soulbound_stacks";
 
@@ -341,7 +341,7 @@ public class PlayerTombEvents {
 	    ModTomb.LOGGER.info("{}{}", MessageType.MESSAGE_NEW_GRAVE.getTranslation(), String.format("(%d, %d, %d) " + spawnPos.dimension(), spawnPos.pos().getX(), spawnPos.pos().getY(), spawnPos.pos().getZ()));
     }
     if (ConfigTomb.TOMBCHAT.get()) {
-      MessageType.MESSAGE_NEW_GRAVE.sendSpecialMessage(player, String.format("(%d, %d, %d) " + spawnPos.dimension(),
+      MessageType.MESSAGE_NEW_GRAVE.sendSpecialMessage(player, String.format("(%d, %d, %d) " + WorldHelper.getDimensionName(spawnPos.dimension()).getString(),
               spawnPos.pos().getX(), spawnPos.pos().getY(), spawnPos.pos().getZ()));
     }
   }
@@ -365,7 +365,7 @@ public class PlayerTombEvents {
     }
   }
 
-  static BlockState getRandomGrave(ServerLevel world, Direction facing) {
+  static BlockState getRandomGrave(ServerLevel serverLevel, Direction facing) {
     //TODO: CONFIG or other selection of what the player wants
     BlockTomb[] graves = new BlockTomb[] {
         TombRegistry.GRAVE_SIMPLE.get(),
@@ -373,9 +373,9 @@ public class PlayerTombEvents {
         TombRegistry.GRAVE_CROSS.get(),
         TombRegistry.TOMBSTONE.get(),
     };
-    BlockState state = graves[world.random.nextInt(graves.length)].defaultBlockState();
+    BlockState state = graves[serverLevel.random.nextInt(graves.length)].defaultBlockState();
     state = state.setValue(BlockTomb.FACING, facing);
-    state = state.setValue(BlockTomb.MODEL_TEXTURE, world.random.nextInt(2));
+    state = state.setValue(BlockTomb.MODEL_TEXTURE, serverLevel.random.nextInt(2));
     return state;
   }
 

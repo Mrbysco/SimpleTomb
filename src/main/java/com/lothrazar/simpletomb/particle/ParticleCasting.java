@@ -22,16 +22,16 @@ public class ParticleCasting extends CustomParticle {
   private final float colorB;
   private boolean goUp;
 
-  public ParticleCasting(ClientLevel world, LivingEntity caster, Predicate<LivingEntity> predic, double addY, double angle) {
-    super(world, caster.getX(), caster.getY() + addY, caster.getZ());
+  public ParticleCasting(ClientLevel level, LivingEntity caster, Predicate<LivingEntity> predic, double addY, double angle) {
+    super(level, caster.getX(), caster.getY() + addY, caster.getZ());
     this.xd = this.yd = this.zd = 0d;
     setAlpha(1f);
     this.goUp = addY < 1d;
     this.caster = caster;
     this.predic = predic;
-    this.quadSize = world.random.nextFloat() * 0.1f + 0.15f;
-    this.angle = angle + WorldHelper.getRandom(world.random, -0.25, 0.25);
-    this.roll = world.random.nextFloat() * (float) (2d * Math.PI);
+    this.quadSize = level.random.nextFloat() * 0.1f + 0.15f;
+    this.angle = angle + WorldHelper.getRandom(level.random, -0.25, 0.25);
+    this.roll = level.random.nextFloat() * (float) (2d * Math.PI);
     float[] color = WorldHelper.getRGBColor3F(14937088);
     this.colorR = color[0];
     this.colorG = color[1];
@@ -48,7 +48,7 @@ public class ParticleCasting extends CustomParticle {
     setColor(clampColor(this.colorR + (WorldHelper.getRandom(level.random, -20f, 20f) / 255f)), clampColor(this.colorG - (WorldHelper.getRandom(level.random, -20f, 20f) / 255f)),
         clampColor(this.colorB + (WorldHelper.getRandom(level.random, -20f, 20f) / 255f)));
     this.oRoll = this.roll;
-    this.roll += ROT_INCR;
+    this.roll += (float) ROT_INCR;
   }
 
   private float clampColor(float color) {

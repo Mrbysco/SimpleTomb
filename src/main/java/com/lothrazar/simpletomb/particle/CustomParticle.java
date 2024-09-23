@@ -20,12 +20,12 @@ import net.minecraft.resources.ResourceLocation;
 
 abstract class CustomParticle extends SingleQuadParticle {
 
-  protected CustomParticle(ClientLevel world, double x, double y, double z) {
-    super(world, x, y, z);
+  protected CustomParticle(ClientLevel level, double x, double y, double z) {
+    super(level, x, y, z);
   }
 
-  protected CustomParticle(ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
-    super(world, x, y, z, motionX, motionY, motionZ);
+  protected CustomParticle(ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
+    super(level, x, y, z, motionX, motionY, motionZ);
   }
 
   abstract ResourceLocation getTexture();

@@ -14,14 +14,14 @@ import java.util.Random;
 
 public class ParticleGraveSmoke extends TransparentParticle {
 
-  Random rand = new Random();
+  final Random rand = new Random();
   private final SpriteSet spriteSet;
   protected final int halfMaxAge;
   protected final float alphaStep;
   private final float rotIncrement;
 
-  private ParticleGraveSmoke(SpriteSet spriteSet, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
-    super(world, x, y + 0.1d, z);
+  private ParticleGraveSmoke(SpriteSet spriteSet, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
+    super(level, x, y + 0.1d, z);
     this.xd = motionX;
     this.yd = motionY;
     this.zd = motionZ;
@@ -64,16 +64,16 @@ public class ParticleGraveSmoke extends TransparentParticle {
 
   public static class Factory implements ParticleProvider<SimpleParticleType> {
 
-    private SpriteSet spriteSet;
+    private final SpriteSet spriteSet;
 
     public Factory(SpriteSet spriteSet) {
       this.spriteSet = spriteSet;
     }
 
     @Override
-    public Particle createParticle(SimpleParticleType type, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
-      RandomSource rand = (world == null) ? RandomSource.createThreadSafe() : world.random;
-      return new ParticleGraveSmoke(this.spriteSet, world, x, y + 0.4d, z, (rand.nextFloat() - 0.5f) * 0.03d, 0d, (rand.nextFloat() - 0.5f) * 0.03d);
+    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
+      RandomSource rand = (level == null) ? RandomSource.createThreadSafe() : level.random;
+      return new ParticleGraveSmoke(this.spriteSet, level, x, y + 0.4d, z, (rand.nextFloat() - 0.5f) * 0.03d, 0d, (rand.nextFloat() - 0.5f) * 0.03d);
     }
   }
 }

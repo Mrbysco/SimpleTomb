@@ -16,8 +16,8 @@ public class ParticleGhost extends TransparentParticle {
   private final SpriteSet spriteSet;
   private final double mX, mZ;
 
-  private ParticleGhost(SpriteSet spriteSet, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
-    super(world, x, y + 1d, z);
+  private ParticleGhost(SpriteSet spriteSet, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
+    super(level, x, y + 1d, z);
     this.mX = motionX;
     this.mZ = motionZ;
     this.xd = this.yd = this.zd = 0d;
@@ -60,16 +60,16 @@ public class ParticleGhost extends TransparentParticle {
 
   public static class Factory implements ParticleProvider<SimpleParticleType> {
 
-    private SpriteSet spriteSet;
+    private final SpriteSet spriteSet;
 
     public Factory(SpriteSet spriteSet) {
       this.spriteSet = spriteSet;
     }
 
     @Override
-    public Particle createParticle(SimpleParticleType type, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
-      RandomSource rand = (world == null) ? RandomSource.createThreadSafe() : world.random;
-      return new ParticleGhost(this.spriteSet, world, x, y, z, WorldHelper.getRandom(rand, -0.05d, 0.05d), 0d, WorldHelper.getRandom(rand, -0.05d, 0.05d));
+    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
+      RandomSource rand = (level == null) ? RandomSource.createThreadSafe() : level.random;
+      return new ParticleGhost(this.spriteSet, level, x, y, z, WorldHelper.getRandom(rand, -0.05d, 0.05d), 0d, WorldHelper.getRandom(rand, -0.05d, 0.05d));
     }
   }
 }

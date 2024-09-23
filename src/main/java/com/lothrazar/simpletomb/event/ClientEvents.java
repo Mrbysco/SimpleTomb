@@ -4,9 +4,6 @@ import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.client.LineRenderType;
 import com.lothrazar.simpletomb.data.DeathHelper;
 import com.lothrazar.simpletomb.helper.WorldHelper;
-import com.lothrazar.simpletomb.particle.ParticleGraveSmoke;
-import com.lothrazar.simpletomb.particle.ParticleGraveSoul;
-import com.lothrazar.simpletomb.particle.ParticleRotatingSmoke;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -19,7 +16,6 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 
@@ -57,9 +53,9 @@ public class ClientEvents {
     Vec3 vec = new Vec3(x, y, z).subtract(cameraPosition);
     if (vec.distanceTo(Vec3.ZERO) > 200d) { // could be 300
       vec = vec.normalize().scale(200d);
-      x += vec.x;
-      y += vec.y;
-      z += vec.z;
+      x += (float) vec.x;
+      y += (float) vec.y;
+      z += (float) vec.z;
     }
     RenderSystem.disableDepthTest();
     RenderType renderType = LineRenderType.tombLinesType();

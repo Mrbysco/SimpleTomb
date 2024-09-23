@@ -12,15 +12,15 @@ public class ParticleRotatingSmoke extends TransparentParticle {
   private final SpriteSet spriteSet;
   private final float rotIncrement;
 
-  private ParticleRotatingSmoke(SpriteSet spriteSet, ClientLevel world, double x, double y, double z) {
-    super(world, x, y + 0.3d, z);
+  private ParticleRotatingSmoke(SpriteSet spriteSet, ClientLevel level, double x, double y, double z) {
+    super(level, x, y + 0.3d, z);
     this.xd = this.yd = this.zd = 0d;
     setAlpha(0.5f);
     scale(2f);
     //    this.mul
     setLifetime(100);
     this.hasPhysics = false;
-    this.oRoll = this.roll = (float) (world.random.nextFloat() * Math.PI * 2f);
+    this.oRoll = this.roll = (float) (level.random.nextFloat() * Math.PI * 2f);
     this.rotIncrement = (float) (Math.PI * 0.02f);
     setColor(0.7f, 0.7f, 0.7f);
     this.spriteSet = spriteSet;
@@ -57,15 +57,15 @@ public class ParticleRotatingSmoke extends TransparentParticle {
 
   public static class Factory implements ParticleProvider<SimpleParticleType> {
 
-    private SpriteSet spriteSet;
+    private final SpriteSet spriteSet;
 
     public Factory(SpriteSet spriteSet) {
       this.spriteSet = spriteSet;
     }
 
     @Override
-    public Particle createParticle(SimpleParticleType type, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
-      return new ParticleRotatingSmoke(this.spriteSet, world, x, y, z);
+    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
+      return new ParticleRotatingSmoke(this.spriteSet, level, x, y, z);
     }
   }
 }

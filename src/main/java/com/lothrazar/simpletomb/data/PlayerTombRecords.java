@@ -75,15 +75,8 @@ public class PlayerTombRecords {
     this.playerGraves = new ArrayList<>();
   }
 
-  /**
-   * because mojang is pretty stupid and made this client only so copy paste
-   */
-  public String getCoordinatesAsString(BlockPos pos) {
-    return "" + pos.getX() + ", " + pos.getY() + ", " + pos.getZ();
-  }
-
   public String toDisplayString(int i, HolderLookup.Provider provider) {
     CompoundTag gd = getGrave(i);
-    return String.format("[%d] (%s) (%s) {%d}", i, getDim(gd), getCoordinatesAsString(getPos(gd)), getDrops(gd, provider).size());
+    return String.format("[%d] (%s) (%s) {%d}", i, getDim(gd),getPos(gd).toShortString(), getDrops(gd, provider).size());
   }
 }

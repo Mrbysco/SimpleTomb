@@ -10,8 +10,8 @@ import net.minecraft.core.particles.SimpleParticleType;
 
 public class ParticleSmokeColumn extends NoRenderParticle {
 
-  private ParticleSmokeColumn(ClientLevel world, double x, double y, double z) {
-    super(world, x, y, z);
+  private ParticleSmokeColumn(ClientLevel level, double x, double y, double z) {
+    super(level, x, y, z);
   }
 
   @Override
@@ -30,8 +30,8 @@ public class ParticleSmokeColumn extends NoRenderParticle {
   public static class Factory implements ParticleProvider<SimpleParticleType> {
 
     @Override
-    public Particle createParticle(SimpleParticleType type, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
-      return new ParticleSmokeColumn(world, x, y, z);
+    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
+      return new ParticleSmokeColumn(level, x, y, z);
     }
   }
 }

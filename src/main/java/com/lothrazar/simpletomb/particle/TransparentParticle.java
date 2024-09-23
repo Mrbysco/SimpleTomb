@@ -9,8 +9,8 @@ import net.minecraft.client.particle.TextureSheetParticle;
 
 public class TransparentParticle extends TextureSheetParticle {
 
-  protected TransparentParticle(ClientLevel world, double x, double y, double z) {
-    super(world, x, y, z);
+  protected TransparentParticle(ClientLevel level, double x, double y, double z) {
+    super(level, x, y, z);
   }
 
   @Override

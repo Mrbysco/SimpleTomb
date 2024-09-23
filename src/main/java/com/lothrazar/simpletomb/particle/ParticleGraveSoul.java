@@ -14,8 +14,8 @@ public class ParticleGraveSoul extends TextureSheetParticle {
   private final SpriteSet spriteSet;
   private final double radius, centerX, centerZ;
 
-  private ParticleGraveSoul(SpriteSet spriteSet, ClientLevel world, double x, double y, double z, double radius) {
-    super(world, x, y + 0.85d, z);
+  private ParticleGraveSoul(SpriteSet spriteSet, ClientLevel level, double x, double y, double z, double radius) {
+    super(level, x, y + 0.85d, z);
     this.lifetime = 100;
     this.quadSize = 0.03f;
     this.centerX = x + 0.5d;
@@ -53,15 +53,15 @@ public class ParticleGraveSoul extends TextureSheetParticle {
 
   public static class Factory implements ParticleProvider<SimpleParticleType> {
 
-    private SpriteSet spriteSet;
+    private final SpriteSet spriteSet;
 
     public Factory(SpriteSet spriteSet) {
       this.spriteSet = spriteSet;
     }
 
     @Override
-    public Particle createParticle(SimpleParticleType type, ClientLevel world, double x, double y, double z, double motionX, double motionY, double motionZ) {
-      return new ParticleGraveSoul(this.spriteSet, world, x, y, z, 0.3d);
+    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
+      return new ParticleGraveSoul(this.spriteSet, level, x, y, z, 0.3d);
     }
   }
 }

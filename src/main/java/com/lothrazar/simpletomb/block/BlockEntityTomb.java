@@ -36,7 +36,7 @@ public class BlockEntityTomb extends BlockEntity {
     super(TombRegistry.TOMBSTONE_BLOCK_ENTITY.get(), pos, blockState);
   }
 
-  private ItemStackHandler handler = new ItemStackHandler(120);
+  private final ItemStackHandler handler = new ItemStackHandler(120);
   protected String ownerName = "";
   protected long deathDate;
   public int timer = 0;
