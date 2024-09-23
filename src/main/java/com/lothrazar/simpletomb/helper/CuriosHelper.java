@@ -14,8 +14,8 @@ import java.util.Set;
 public class CuriosHelper {
 
   public static boolean autoEquip(ItemStack stack, Player player) {
-    Set<String> tags = CuriosApi.getCuriosHelper().getCurioTags(stack.getItem());
-    ICuriosItemHandler handler = CuriosApi.getCuriosHelper().getCuriosHandler(player).orElse(null);
+    Set<String> tags = CuriosApi.getItemStackSlots(stack, player.level()).keySet();
+    ICuriosItemHandler handler = CuriosApi.getCuriosInventory(player).orElse(null);
     if (handler == null) {
       return false;
     }
