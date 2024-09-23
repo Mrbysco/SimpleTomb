@@ -3,6 +3,9 @@ package com.lothrazar.simpletomb.helper;
 import com.lothrazar.simpletomb.ConfigTomb;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
@@ -93,7 +96,7 @@ public class WorldHelper {
     positions.sort((pos0, pos1) -> {
       double dist0 = Math.sqrt(pos0.distSqr(initPos));
       double dist1 = Math.sqrt(pos1.distSqr(initPos));
-      return Double.valueOf(dist0).compareTo(dist1);
+      return Double.compare(dist0, dist1);
     });
   }
 
@@ -207,5 +210,10 @@ public class WorldHelper {
              FastColor.ABGR32.green(color) / 255.0F,
              FastColor.ABGR32.blue(color) / 255.0F,
     };
+  }
+
+  public static Component getDimensionName(ResourceKey<Level> levelResourceKey) {
+    ResourceLocation dimLocation = levelResourceKey.location();
+    return Component.translatableWithFallback(dimLocation.toLanguageKey("dimension"), dimLocation.toString());
   }
 }
