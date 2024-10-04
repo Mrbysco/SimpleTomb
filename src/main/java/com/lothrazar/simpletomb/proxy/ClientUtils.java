@@ -60,4 +60,10 @@ public class ClientUtils {
       }
     }
   }
+
+  public static BlockPos getPlayerPos() {
+    Minecraft mc = Minecraft.getInstance();
+    if (mc.player == null) return null;
+    return mc.player.blockPosition();
+  }
 }

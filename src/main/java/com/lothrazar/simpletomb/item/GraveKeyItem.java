@@ -9,8 +9,6 @@ import com.lothrazar.simpletomb.helper.NBTHelper;
 import com.lothrazar.simpletomb.helper.WorldHelper;
 import com.lothrazar.simpletomb.proxy.ClientUtils;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
@@ -120,12 +118,12 @@ public class GraveKeyItem extends SwordItem {
   @Override
   
   public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> list, TooltipFlag tooltipFlag) {
-    if (Screen.hasShiftDown()) {
+    Level level = context.level();
+    if (level != null && level.isClientSide && net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
       GlobalPos location = this.getTombPos(stack);
       //      this.addItemPosition(list, this.getTombPos(stack));
-      Player player = Minecraft.getInstance().player;
-      if (player != null && !location.equals(DeathHelper.ORIGIN)) {
-        BlockPos pos = player.blockPosition();
+      BlockPos pos = ClientUtils.getPlayerPos();
+      if (pos != null && !location.equals(DeathHelper.ORIGIN)) {
         BlockPos tombPos = location.pos();
         int distance = (int) getDistance(tombPos, pos);
         list.add(Component.translatable(MessageType.MESSAGE_DISTANCE.getKey(),
