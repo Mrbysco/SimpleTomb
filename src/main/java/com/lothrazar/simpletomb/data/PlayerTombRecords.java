@@ -58,7 +58,7 @@ public class PlayerTombRecords {
   }
 
   public static ResourceKey<Level> getDim(CompoundTag grave) {
-    ResourceLocation dim = ResourceLocation.parse(grave.getString("dim"));
+    ResourceLocation dim = ResourceLocation.parse(grave.getString("dimension"));
     return ResourceKey.create(Registries.DIMENSION, dim);
   }
 
