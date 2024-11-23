@@ -150,7 +150,7 @@ public class CommandEvents {
       List<ItemStack> drops = PlayerTombRecords.getDrops(grave, ctx.getSource().registryAccess());
       //      ModTomb.LOGGER.error("items contained " + drops.size());
       //TODO: is this dupe code from location class?
-      ServerLevel targetWorld = ctx.getSource().getLevel().getServer().getLevel(dim);
+      ServerLevel targetWorld = ctx.getSource().getServer().getLevel(dim);
       BlockState state = PlayerTombEvents.getRandomGrave(targetWorld, Direction.NORTH);
       boolean wasPlaced = WorldHelper.placeGrave(targetWorld, pos, state);
       if (wasPlaced) {
@@ -163,7 +163,10 @@ public class CommandEvents {
           ItemHandlerHelper.insertItemStacked(itemHandler, d.copy(), false);
         }
       }
-      ctx.getSource().sendSuccess(() -> Component.literal("Restored tomb with at [" + pos + "] in " + dim), false);
+      ctx.getSource().sendSuccess(() -> Component.literal("Restored tomb with at [")
+              .append(Component.literal(pos.toShortString()).withStyle(ChatFormatting.YELLOW)).append("] in ")
+              .append(Component.translatable(dim.location().toLanguageKey("dimension")).withStyle(ChatFormatting.GOLD))
+              .withStyle(ChatFormatting.GREEN), false);
     }
     return 0;
   }
