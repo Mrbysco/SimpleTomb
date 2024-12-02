@@ -10,6 +10,8 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +34,7 @@ public class ModTomb {
     eventBus.addListener(TombRegistry::registerCapabilities);
     NeoForge.EVENT_BUS.register(new CommandEvents());
     if (dist.isClient()) {
+      container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
       eventBus.addListener(ClientUtils::registerEntityRenders);
       eventBus.addListener(ClientUtils::registerParticleFactories);
       NeoForge.EVENT_BUS.addListener(ClientEvents::renderEvent);
