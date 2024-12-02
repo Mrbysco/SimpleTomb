@@ -130,7 +130,6 @@ public class BlockTomb extends BaseEntityBlock {
     }
   }
 
-  @SuppressWarnings("deprecation")
   @Override
   public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
     if (!state.is(newState.getBlock())) {
