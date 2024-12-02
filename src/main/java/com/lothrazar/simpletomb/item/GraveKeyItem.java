@@ -47,7 +47,7 @@ public class GraveKeyItem extends SwordItem {
   public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int count) {
     if (entity instanceof Player player) {
       GlobalPos location = this.getTombPos(stack);
-      if (location == null || !location.equals(DeathHelper.ORIGIN) || !location.equals(level.dimension())) {
+      if (location == null || location.equals(DeathHelper.ORIGIN) || !location.dimension().equals(level.dimension())) {
         return;
       }
       BlockPos tombPos = location.pos();
