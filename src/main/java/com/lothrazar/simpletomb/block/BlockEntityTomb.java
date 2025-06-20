@@ -17,6 +17,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -33,7 +34,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class BlockEntityTomb extends BlockEntity {
+public class BlockEntityTomb extends BlockEntity implements Clearable {
 
   private static final int SOULTIMER = 100;
 
@@ -242,6 +243,16 @@ public class BlockEntityTomb extends BlockEntity {
     tile.timer++;
     if ((tile.timer - 1) % SOULTIMER == 0) {
       tile.timer = 1;
+    }
+  }
+
+  @Override
+  public void clearContent() {
+    IItemHandler inventory = handler.orElse(null);
+    if (inventory instanceof ItemStackHandler handler) {
+      for (int i = 0; i < inventory.getSlots(); ++i) {
+        handler.setStackInSlot(i, ItemStack.EMPTY);
+      }
     }
   }
 }
