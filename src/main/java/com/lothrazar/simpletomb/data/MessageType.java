@@ -41,6 +41,6 @@ public enum MessageType {
   }
 
   public void sendSpecialMessage(Player sender, Object... params) {
-    sender.sendSystemMessage(this.getTranslationWithStyle(MESSAGE_SPECIAL, params));
+    sender.displayClientMessage(this.getTranslationWithStyle(MESSAGE_SPECIAL, params), false);
   }
 }

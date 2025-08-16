@@ -4,6 +4,7 @@ import com.lothrazar.simpletomb.ModTomb;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.CuriosSlotTypes;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
@@ -14,7 +15,7 @@ import java.util.Set;
 public class CuriosHelper {
 
   public static boolean autoEquip(ItemStack stack, Player player) {
-    Set<String> tags = CuriosApi.getItemStackSlots(stack, player.level()).keySet();
+    Set<String> tags = CuriosSlotTypes.getItemSlotTypes(stack, player.level().isClientSide).keySet();
     ICuriosItemHandler handler = CuriosApi.getCuriosInventory(player).orElse(null);
     if (handler == null) {
       return false;

@@ -7,8 +7,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.fml.ModList;
@@ -49,14 +49,14 @@ public class EntityHelper {
           return true;
         }
       }
-      EquipmentSlot slot = stack.getItem().getEquipmentSlot(stack);
+      EquipmentSlot slot = stack.getEquipmentSlot();
       boolean isElytra = false;
       if (slot == null) {
         if (stack.getItem() instanceof ArmorItem) {
-          slot = ((ArmorItem) stack.getItem()).getEquipmentSlot();
+          slot = stack.getEquipmentSlot();
         }
         else {
-          if (!(stack.getItem() instanceof ElytraItem)) {
+          if (!stack.is(Items.ELYTRA)) {
             return false;
           }
           slot = EquipmentSlot.CHEST;
@@ -64,7 +64,7 @@ public class EntityHelper {
         }
       }
       else if (slot == EquipmentSlot.CHEST) {
-        isElytra = stack.getItem() instanceof ElytraItem;
+        isElytra = stack.is(Items.ELYTRA);
       }
       int slotId = slot.getIndex();
       ItemStack stackInSlot = player.getInventory().armor.get(slotId);

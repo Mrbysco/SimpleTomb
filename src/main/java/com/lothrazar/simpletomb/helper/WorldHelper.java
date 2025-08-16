@@ -6,7 +6,8 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
@@ -123,8 +124,8 @@ public class WorldHelper {
         if (y < 1) {
           y = 1;
         }
-        if (y > level.getMaxBuildHeight()) {
-          y = level.getMaxBuildHeight() - 1;
+        if (y > level.getMaxY()) {
+          y = level.getMaxY() - 1;
         }
       }
       return new BlockPos(x, y, z);
@@ -136,7 +137,7 @@ public class WorldHelper {
   }
 
   public static boolean isRuleKeepInventory(Level level) {
-    return level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
+    return level instanceof ServerLevel serverLevel && serverLevel.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
   }
 
   public static void removeNoEvent(Level level, BlockPos pos) {
@@ -206,9 +207,9 @@ public class WorldHelper {
 
   public static float[] getRGBColor3F(int color) {
     return new float[] {
-            FastColor.ABGR32.red(color) / 255.0F,
-             FastColor.ABGR32.green(color) / 255.0F,
-             FastColor.ABGR32.blue(color) / 255.0F,
+            ARGB.red(color) / 255.0F,
+		    ARGB.green(color) / 255.0F,
+		    ARGB.blue(color) / 255.0F,
     };
   }
 

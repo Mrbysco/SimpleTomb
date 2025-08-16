@@ -10,6 +10,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -44,13 +45,11 @@ public class BlockTomb extends BaseEntityBlock {
   public static final IntegerProperty MODEL_TEXTURE = IntegerProperty.create("model_texture", 0, 1);
   public static final BooleanProperty IS_ENGRAVED = BooleanProperty.create("is_engraved");
   private static final VoxelShape GROUND = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 4D, 16.0D);
-  protected final String name;
   protected final ModelTomb graveModel;
 
   public BlockTomb(Block.Properties properties, ModelTomb graveModel) {
-    super(properties.noOcclusion().strength(-1.0F, 3600000.0F));
+    super(properties.noOcclusion().strength(-1.0F, 3600000.0F).overrideDescription(ModTomb.MODID + ".grave." + graveModel.getSerializedName()));
     this.graveModel = graveModel;
-    this.name = graveModel.getSerializedName();
   }
 
   @Override
@@ -73,17 +72,12 @@ public class BlockTomb extends BaseEntityBlock {
   }
 
   @Override
-  public String getDescriptionId() {
-    return ModTomb.MODID + ".grave." + this.name;
-  }
-
-  @Override
   public boolean dropFromExplosion(Explosion explosion) {
     return false;
   }
 
   @Override
-  public void onBlockExploded(BlockState state, Level level, BlockPos pos, Explosion explosion) {
+  public void onBlockExploded(BlockState state, ServerLevel level, BlockPos pos, Explosion explosion) {
     //  dont destroy/setair  super.onBlockExploded(state, level, pos, explosion);
   }
 

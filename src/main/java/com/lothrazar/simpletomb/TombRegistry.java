@@ -25,19 +25,18 @@ public class TombRegistry {
   public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, ModTomb.MODID);
   public static final DeferredRegister<ParticleType<?>> PARTICLE_TYPES = DeferredRegister.create(BuiltInRegistries.PARTICLE_TYPE, ModTomb.MODID);
   //Blocks
-  public static final DeferredBlock<BlockTomb> GRAVE_SIMPLE = BLOCKS.register("grave_simple", () -> new BlockTomb(Block.Properties.of().mapColor(MapColor.STONE), ModelTomb.GRAVE_SIMPLE));
-  public static final DeferredBlock<BlockTomb> GRAVE_NORMAL = BLOCKS.register("grave_normal", () -> new BlockTomb(Block.Properties.of().mapColor(MapColor.STONE), ModelTomb.GRAVE_NORMAL));
-  public static final DeferredBlock<BlockTomb> GRAVE_CROSS = BLOCKS.register("grave_cross", () -> new BlockTomb(Block.Properties.of().mapColor(MapColor.STONE), ModelTomb.GRAVE_CROSS));
-  public static final DeferredBlock<BlockTomb> TOMBSTONE = BLOCKS.register("tombstone", () -> new BlockTomb(Block.Properties.of().mapColor(MapColor.STONE), ModelTomb.GRAVE_TOMB));
+  public static final DeferredBlock<BlockTomb> GRAVE_SIMPLE = BLOCKS.registerBlock("grave_simple", (properties) -> new BlockTomb(properties.mapColor(MapColor.STONE), ModelTomb.GRAVE_SIMPLE));
+  public static final DeferredBlock<BlockTomb> GRAVE_NORMAL = BLOCKS.registerBlock("grave_normal", (properties) -> new BlockTomb(properties.mapColor(MapColor.STONE), ModelTomb.GRAVE_NORMAL));
+  public static final DeferredBlock<BlockTomb> GRAVE_CROSS = BLOCKS.registerBlock("grave_cross", (properties) -> new BlockTomb(properties.mapColor(MapColor.STONE), ModelTomb.GRAVE_CROSS));
+  public static final DeferredBlock<BlockTomb> TOMBSTONE = BLOCKS.registerBlock("tombstone", (properties) -> new BlockTomb(properties.mapColor(MapColor.STONE), ModelTomb.GRAVE_TOMB));
   //Items
-  public static final DeferredItem<GraveKeyItem> GRAVE_KEY = ITEMS.register("grave_key", () -> new GraveKeyItem(new Item.Properties()));
+  public static final DeferredItem<GraveKeyItem> GRAVE_KEY = ITEMS.registerItem("grave_key", GraveKeyItem::new);
   //BlockEntities
-  public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityTomb>> TOMBSTONE_BLOCK_ENTITY = BLOCK_ENTITIES.register("tombstone", () -> BlockEntityType.Builder.of(BlockEntityTomb::new,
+  public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityTomb>> TOMBSTONE_BLOCK_ENTITY = BLOCK_ENTITIES.register("tombstone", () -> new BlockEntityType<>(BlockEntityTomb::new,
       TombRegistry.GRAVE_SIMPLE.get(),
       TombRegistry.GRAVE_NORMAL.get(),
       TombRegistry.GRAVE_CROSS.get(),
-      TombRegistry.TOMBSTONE.get())
-      .build(null));
+      TombRegistry.TOMBSTONE.get()));
   //Particles
   public static final DeferredHolder<ParticleType<?>, SimpleParticleType> GRAVE_SMOKE = PARTICLE_TYPES.register("grave_smoke", () -> new SimpleParticleType(false));
   public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ROTATING_SMOKE = PARTICLE_TYPES.register("rotating_smoke", () -> new SimpleParticleType(false));

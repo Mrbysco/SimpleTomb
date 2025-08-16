@@ -30,13 +30,13 @@ abstract class CustomParticle extends SingleQuadParticle {
     TextureManager textureManager = Minecraft.getInstance().getTextureManager();
     //    Lighting.turnOff();
     RenderSystem.depthMask(false);
-    textureManager.bindForSetup(getTexture());
+//    textureManager.bindForSetup(getTexture()); TODO:
     RenderSystem.enableBlend();
     RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
     //    RenderSystem.alphaFunc(516, 0.003921569F);
     //    Tesselator.getInstance().getBuilder().begin(7, DefaultVertexFormat.PARTICLE);
 
-    RenderSystem.setShader(GameRenderer::getParticleShader);
+//    RenderSystem.setShader(GameRenderer::getParticleShader); TODO:
     RenderSystem.setShaderTexture(0, getTexture());
     super.render(buffer, entityIn, partialTicks);
   }

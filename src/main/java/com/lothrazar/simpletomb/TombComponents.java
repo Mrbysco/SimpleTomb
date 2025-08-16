@@ -8,11 +8,12 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.function.Supplier;
 
 public class TombComponents {
-	public static final DeferredRegister<DataComponentType<?>> COMPONENT_TYPE = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, ModTomb.MODID);
+	public static final DeferredRegister.DataComponents COMPONENT_TYPE = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, ModTomb.MODID);
 
-	public static final Supplier<DataComponentType<GlobalPos>> TOMB_POS = COMPONENT_TYPE.register("tomb_pos", () ->
-			DataComponentType.<GlobalPos>builder()
+	public static final Supplier<DataComponentType<GlobalPos>> TOMB_POS = COMPONENT_TYPE.registerComponentType("tomb_pos", builder ->
+			builder
 					.persistent(GlobalPos.CODEC)
 					.networkSynchronized(GlobalPos.STREAM_CODEC)
-					.build());
+					.cacheEncoding()
+	);
 }

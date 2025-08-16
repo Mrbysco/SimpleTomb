@@ -14,15 +14,15 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.Tiers;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,13 +34,7 @@ import java.util.List;
 public class GraveKeyItem extends SwordItem {
 
   public GraveKeyItem(Item.Properties properties) {
-    super(Tiers.STONE, properties.stacksTo(1).attributes(SwordItem.createAttributes(Tiers.STONE, 3, -2.4F)));
-  }
-
-  @Override
-  
-  public Component getDescription() {
-    return Component.translatable(this.getDescriptionId()).withStyle(ChatFormatting.GOLD);
+    super(ToolMaterial.STONE, 3, -2.4F, properties.stacksTo(1).rarity(Rarity.UNCOMMON));
   }
 
   @Override
@@ -104,15 +98,14 @@ public class GraveKeyItem extends SwordItem {
   }
 
   @Override
-  public InteractionResultHolder<ItemStack> use(Level level, Player playerIn, InteractionHand handIn) {
-    ItemStack itemstack = playerIn.getItemInHand(handIn);
+  public InteractionResult use(Level level, Player playerIn, InteractionHand handIn) {
     playerIn.startUsingItem(handIn);
-    return InteractionResultHolder.success(itemstack);
+    return InteractionResult.SUCCESS;
   }
 
   @Override
-  public UseAnim getUseAnimation(ItemStack stack) {
-    return UseAnim.BOW;
+  public ItemUseAnimation getUseAnimation(ItemStack stack) {
+    return ItemUseAnimation.BOW;
   }
 
   @Override

@@ -11,6 +11,8 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -27,9 +29,11 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
 
   private static final ResourceLocation SKELETON_HEAD = ResourceLocation.withDefaultNamespace("textures/entity/skeleton/skeleton.png");
   private final Font font;
+  private final ItemRenderer itemRenderer;
 
   public RenderTomb(BlockEntityRendererProvider.Context cx) {
     this.font = cx.getFont();
+	this.itemRenderer = cx.getItemRenderer();
   }
 
   private static final String TIME_FORMAT = "HH:mm:ss";
@@ -186,15 +190,14 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
         decoY += 0.1f;
       break;
     }
-    Minecraft.getInstance().getTextureManager().bindForSetup(SKELETON_HEAD);
+//    Minecraft.getInstance().getTextureManager().bindForSetup(SKELETON_HEAD);
     poseStack.pushPose();
     poseStack.translate(decoX, decoY, decoZ);
     poseStack.mulPose(Axis.YP.rotationDegrees(facing.toYRot() + (facing == Direction.SOUTH || facing == Direction.NORTH ? 180 : 0)));
     if (graveModel == ModelTomb.GRAVE_NORMAL || graveModel == ModelTomb.GRAVE_SIMPLE) {
       poseStack.scale(0.2f, 0.2f, 0.2f);
       ItemStack stack = new ItemStack(isNight ? Blocks.JACK_O_LANTERN : Blocks.PUMPKIN);
-      Minecraft.getInstance().getItemRenderer().render(stack, ItemDisplayContext.NONE, false, poseStack, bufferSource, 15728880,
-          net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, Minecraft.getInstance().getItemRenderer().getModel(stack, null, null, 0));
+	  itemRenderer.renderStatic(stack, ItemDisplayContext.NONE, 15728880, OverlayTexture.NO_OVERLAY, poseStack, bufferSource, Minecraft.getInstance().level, 0);
     }
     else {
       poseStack.scale(0.3f, 0.3f, 0.3f);
