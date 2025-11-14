@@ -162,7 +162,7 @@ public class PlayerTombEvents {
 
   private final static Map<UUID, List<ItemStack>> keepingMap = new HashMap<>();
 
-  @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
+  @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
   public void onPlayerDrops(LivingDropsEvent event) {
     if (!ConfigTomb.TOMBENABLED.get()) {
       return;
