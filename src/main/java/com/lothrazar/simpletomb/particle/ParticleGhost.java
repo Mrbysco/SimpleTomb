@@ -5,11 +5,10 @@ import com.lothrazar.simpletomb.proxy.ClientUtils;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.RandomSource;
-
 
 public class ParticleGhost extends TransparentParticle {
 
@@ -17,7 +16,7 @@ public class ParticleGhost extends TransparentParticle {
   private final double mX, mZ;
 
   private ParticleGhost(SpriteSet spriteSet, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
-    super(level, x, y + 1d, z);
+    super(level, x, y + 1d, z, spriteSet);
     this.mX = motionX;
     this.mZ = motionZ;
     this.xd = this.yd = this.zd = 0d;
@@ -40,7 +39,7 @@ public class ParticleGhost extends TransparentParticle {
       float ratio = this.age / (float) this.lifetime;
       setAlpha((1f - ratio) * 0.8f);
       setSpriteFromAge(this.spriteSet);
-      if (level.isClientSide) {
+      if (level.isClientSide()) {
         ClientUtils.produceGraveSmoke(this.level, this.x, this.y - 1d, this.z);
       }
     }
@@ -54,8 +53,8 @@ public class ParticleGhost extends TransparentParticle {
   }
 
   @Override
-  public ParticleRenderType getRenderType() {
-    return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+  protected SingleQuadParticle.Layer getLayer() {
+    return SingleQuadParticle.Layer.TRANSLUCENT;
   }
 
   public static class Factory implements ParticleProvider<SimpleParticleType> {
@@ -67,9 +66,8 @@ public class ParticleGhost extends TransparentParticle {
     }
 
     @Override
-    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
-      RandomSource rand = (level == null) ? RandomSource.createThreadSafe() : level.random;
-      return new ParticleGhost(this.spriteSet, level, x, y, z, WorldHelper.getRandom(rand, -0.05d, 0.05d), 0d, WorldHelper.getRandom(rand, -0.05d, 0.05d));
+    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ, RandomSource random) {
+      return new ParticleGhost(this.spriteSet, level, x, y, z, WorldHelper.getRandom(random, -0.05d, 0.05d), 0d, WorldHelper.getRandom(random, -0.05d, 0.05d));
     }
   }
 }

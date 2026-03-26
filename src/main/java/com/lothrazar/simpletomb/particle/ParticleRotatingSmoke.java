@@ -3,9 +3,10 @@ package com.lothrazar.simpletomb.particle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.RandomSource;
 
 public class ParticleRotatingSmoke extends TransparentParticle {
 
@@ -13,11 +14,10 @@ public class ParticleRotatingSmoke extends TransparentParticle {
   private final float rotIncrement;
 
   private ParticleRotatingSmoke(SpriteSet spriteSet, ClientLevel level, double x, double y, double z) {
-    super(level, x, y + 0.3d, z);
+    super(level, x, y + 0.3d, z, spriteSet);
     this.xd = this.yd = this.zd = 0d;
     setAlpha(0.5f);
     scale(2f);
-    //    this.mul
     setLifetime(100);
     this.hasPhysics = false;
     this.oRoll = this.roll = (float) (level.random.nextFloat() * Math.PI * 2f);
@@ -51,8 +51,8 @@ public class ParticleRotatingSmoke extends TransparentParticle {
   }
 
   @Override
-  public ParticleRenderType getRenderType() {
-    return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+  protected SingleQuadParticle.Layer getLayer() {
+    return SingleQuadParticle.Layer.TRANSLUCENT;
   }
 
   public static class Factory implements ParticleProvider<SimpleParticleType> {
@@ -64,7 +64,7 @@ public class ParticleRotatingSmoke extends TransparentParticle {
     }
 
     @Override
-    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
+    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ, RandomSource random) {
       return new ParticleRotatingSmoke(this.spriteSet, level, x, y, z);
     }
   }

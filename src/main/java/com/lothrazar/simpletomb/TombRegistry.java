@@ -11,8 +11,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.material.MapColor;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -41,8 +39,6 @@ public class TombRegistry {
   public static final DeferredHolder<ParticleType<?>, SimpleParticleType> GRAVE_SMOKE = PARTICLE_TYPES.register("grave_smoke", () -> new SimpleParticleType(false));
   public static final DeferredHolder<ParticleType<?>, SimpleParticleType> ROTATING_SMOKE = PARTICLE_TYPES.register("rotating_smoke", () -> new SimpleParticleType(false));
   public static final DeferredHolder<ParticleType<?>, SimpleParticleType> SOUL = PARTICLE_TYPES.register("soul", () -> new SimpleParticleType(false));
+  public static final DeferredHolder<ParticleType<?>, SimpleParticleType> CASTING = PARTICLE_TYPES.register("casting", () -> new SimpleParticleType(false));
 
-  public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, TOMBSTONE_BLOCK_ENTITY.get(), BlockEntityTomb::getHandler);
-  }
 }

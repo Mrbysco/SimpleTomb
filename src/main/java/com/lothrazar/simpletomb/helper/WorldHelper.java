@@ -4,17 +4,17 @@ import com.lothrazar.simpletomb.ConfigTomb;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.gamerules.GameRules;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,16 +26,11 @@ public class WorldHelper {
   }
 
   public static boolean isValidPlacement(Level level, BlockPos myPos) {
-    //0 is the bottom bedrock level
-    //so if we place there, players cant place a block under it to stand safely
     if (level.isOutsideBuildHeight(myPos)) {
-      // blockstate doesnt matter, out of world
       return false;
     }
-    //    FluidState fluidHere = world.getFluidState(myPos);
-    //only air or water. not any fluid state, and not any waterlogged block
     BlockState blockState = level.getBlockState(myPos);
-    return blockState.isAir() || blockState.getBlock() == Blocks.WATER; // && fluidHere.getFluid().isIn(FluidTags.WATER));
+    return blockState.isAir() || blockState.getBlock() == Blocks.WATER;
   }
 
   public static GlobalPos findGraveSpawn(final Player player, final BlockPos initPos) {
@@ -43,30 +38,21 @@ public class WorldHelper {
     final int yRange = ConfigTomb.VSEARCHRANGE.get();
     final int zRange = ConfigTomb.HSEARCHRANGE.get();
     Level level = player.level();
-    //   
-    //shortcut: if the death position is valid AND solid base. JUST DO THAT dont even search
     if (isValidPlacement(level, initPos)
         && isValidSolid(level, initPos)) {
-      //      ModTomb.LOGGER.info(" initPos is enough =  " + initPos);
       return new GlobalPos(level.dimension(), initPos);
     }
-    //
-    //    ModTomb.LOGGER.info(isValidINIT + "find initPos=  " + initPos);
     List<BlockPos> positionsWithSolidBelow = new ArrayList<>();
     List<BlockPos> positions = new ArrayList<>();
     for (int x = initPos.getX() - xRange; x < initPos.getX() + xRange; x++) {
       for (int y = initPos.getY() - yRange; y < initPos.getY() + yRange; y++) {
         for (int z = initPos.getZ() - zRange; z < initPos.getZ() + zRange; z++) {
           BlockPos myPos = new BlockPos(x, y, z);
-          //
           boolean isValid = isValidPlacement(level, myPos);
-          //          ModTomb.LOGGER.info("isvalid  initPos=  " + isValid);
           if (!isValid) {
             continue;
           }
-          //where do we put this
           if (isValidSolid(level, myPos)) {
-            //this is better
             positionsWithSolidBelow.add(myPos);
           }
           else {
@@ -75,15 +61,12 @@ public class WorldHelper {
         }
       }
     }
-    //first, if we have a 'solid pase' pos, use that
     BlockPos found = null;
     if (positionsWithSolidBelow.size() > 0) {
-      //use this one 
       sortByDistance(initPos, positionsWithSolidBelow);
       found = positionsWithSolidBelow.getFirst();
     }
     else if (positions.size() > 0) {
-      //i guess it has to float in the air
       sortByDistance(initPos, positions);
       found = positions.getFirst();
     }
@@ -137,7 +120,7 @@ public class WorldHelper {
   }
 
   public static boolean isRuleKeepInventory(Level level) {
-    return level instanceof ServerLevel serverLevel && serverLevel.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY);
+    return level instanceof ServerLevel serverLevel && serverLevel.getGameRules().get(GameRules.KEEP_INVENTORY);
   }
 
   public static void removeNoEvent(Level level, BlockPos pos) {
@@ -149,8 +132,8 @@ public class WorldHelper {
   }
 
   public static boolean isNight(Level level) {
-    float angle = level.getSunAngle(0.0F);
-    return angle >= 0.245F && angle <= 0.755F;
+    long dayTime = level.getDayTime() % 24000L;
+    return dayTime >= 13000L && dayTime < 23000L;
   }
 
   public static float[] getHSBtoRGBF(float hue, float saturation, float brightness) {
@@ -208,13 +191,13 @@ public class WorldHelper {
   public static float[] getRGBColor3F(int color) {
     return new float[] {
             ARGB.red(color) / 255.0F,
-		    ARGB.green(color) / 255.0F,
-		    ARGB.blue(color) / 255.0F,
+            ARGB.green(color) / 255.0F,
+            ARGB.blue(color) / 255.0F,
     };
   }
 
   public static Component getDimensionName(ResourceKey<Level> levelResourceKey) {
-    ResourceLocation dimLocation = levelResourceKey.location();
+    Identifier dimLocation = levelResourceKey.identifier();
     return Component.translatableWithFallback(dimLocation.toLanguageKey("dimension"), dimLocation.toString());
   }
 }

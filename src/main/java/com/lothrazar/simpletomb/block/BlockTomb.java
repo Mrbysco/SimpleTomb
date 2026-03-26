@@ -13,7 +13,9 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
@@ -31,6 +33,8 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+
+import java.util.function.BiConsumer;
 
 public class BlockTomb extends BaseEntityBlock {
   public static final MapCodec<BlockTomb> CODEC = RecordCodecBuilder.mapCodec(
@@ -77,8 +81,7 @@ public class BlockTomb extends BaseEntityBlock {
   }
 
   @Override
-  public void onBlockExploded(BlockState state, ServerLevel level, BlockPos pos, Explosion explosion) {
-    //  dont destroy/setair  super.onBlockExploded(state, level, pos, explosion);
+  public void onExplosionHit(BlockState state, ServerLevel level, BlockPos pos, Explosion explosion, BiConsumer<ItemStack, BlockPos> dropConsumer) {
   }
 
   public static BlockEntityTomb getBlockEntity(Level level, BlockPos pos) {
@@ -93,7 +96,7 @@ public class BlockTomb extends BaseEntityBlock {
 
   @Override
   public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-    return createTickerHelper(type, TombRegistry.TOMBSTONE_BLOCK_ENTITY.get(), level.isClientSide ? BlockEntityTomb::clientTick : BlockEntityTomb::serverTick);
+    return createTickerHelper(type, TombRegistry.TOMBSTONE_BLOCK_ENTITY.get(), level.isClientSide() ? BlockEntityTomb::clientTick : BlockEntityTomb::serverTick);
   }
 
   @Override
@@ -102,8 +105,8 @@ public class BlockTomb extends BaseEntityBlock {
   }
 
   @Override
-  public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-    if (!level.isClientSide && entity.isShiftKeyDown() && entity.isAlive() &&
+  public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean movedByPiston) {
+    if (!level.isClientSide() && entity.isShiftKeyDown() && entity.isAlive() &&
         EntityHelper.isValidPlayer(entity)) {
       activatePlayerGrave(level, pos, state, (ServerPlayer) entity);
     }
@@ -117,21 +120,17 @@ public class BlockTomb extends BaseEntityBlock {
         return;
       }
       TombRegistry.GRAVE_KEY.get().removeKeyForGraveInInventory(player, new GlobalPos(level.dimension(), pos));
-      //either you are the owner, or it has setting that says anyone can access
       tile.giveInventory(player);
-      //clear saved loc
       DeathHelper.INSTANCE.deleteLastGrave(player);
     }
   }
 
   @Override
-  public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-    if (!state.is(newState.getBlock())) {
-      BlockEntity blockentity = level.getBlockEntity(pos);
-      if (blockentity instanceof BlockEntityTomb blockEntityTomb) {
-        blockEntityTomb.dropInventory(level, pos);
-      }
-      super.onRemove(state, level, pos, newState, isMoving);
+  public void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean isMoving) {
+    BlockEntity blockentity = level.getBlockEntity(pos);
+    if (blockentity instanceof BlockEntityTomb blockEntityTomb) {
+      blockEntityTomb.dropInventory(level, pos);
     }
+    super.affectNeighborsAfterRemoval(state, level, pos, isMoving);
   }
 }

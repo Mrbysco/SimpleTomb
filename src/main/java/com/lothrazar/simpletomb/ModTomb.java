@@ -31,7 +31,6 @@ public class ModTomb {
     TombRegistry.ITEMS.register(eventBus);
     TombRegistry.BLOCK_ENTITIES.register(eventBus);
     TombRegistry.PARTICLE_TYPES.register(eventBus);
-    eventBus.addListener(TombRegistry::registerCapabilities);
     NeoForge.EVENT_BUS.register(new CommandEvents());
     if (dist.isClient()) {
       container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);

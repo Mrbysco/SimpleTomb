@@ -6,9 +6,9 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -38,9 +38,9 @@ public class PlayerTombRecords {
   public void read(CompoundTag data, UUID playerId) {
     this.playerId = playerId;
     if (data.contains(ModTomb.MODID)) {
-      ListTag glist = data.getList(ModTomb.MODID, CompoundTag.TAG_COMPOUND);
+      ListTag glist = data.getListOrEmpty(ModTomb.MODID);
       for (int i = 0; i < glist.size(); i++) {
-        this.playerGraves.add(glist.getCompound(i));
+        this.playerGraves.add(glist.getCompoundOrEmpty(i));
       }
     }
   }
@@ -54,19 +54,22 @@ public class PlayerTombRecords {
   }
 
   public static BlockPos getPos(CompoundTag grave) {
-    return NbtUtils.readBlockPos(grave, "pos").get();
+    return BlockPos.CODEC.parse(NbtOps.INSTANCE, grave.get("pos")).result().orElse(BlockPos.ZERO);
   }
 
   public static ResourceKey<Level> getDim(CompoundTag grave) {
-    ResourceLocation dim = ResourceLocation.parse(grave.getString("dimension"));
+    Identifier dim = Identifier.parse(grave.getStringOr("dimension", "minecraft:overworld"));
     return ResourceKey.create(Registries.DIMENSION, dim);
   }
 
   public static List<ItemStack> getDrops(CompoundTag grave, HolderLookup.Provider provider) {
-    ListTag drops = grave.getList("drops", 10);
+    ListTag drops = grave.getListOrEmpty("drops");
     List<ItemStack> done = new ArrayList<ItemStack>();
     for (int i = 0; i < drops.size(); i++) {
-      done.add(ItemStack.parseOptional(provider, drops.getCompound(i)));
+      done.add(ItemStack.CODEC.parse(
+          provider.createSerializationContext(NbtOps.INSTANCE),
+          drops.getCompoundOrEmpty(i)
+      ).result().orElse(ItemStack.EMPTY));
     }
     return done;
   }

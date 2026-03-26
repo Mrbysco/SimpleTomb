@@ -3,14 +3,13 @@ package com.lothrazar.simpletomb.particle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 
 import java.util.Random;
-
 
 public class ParticleGraveSmoke extends TransparentParticle {
 
@@ -21,7 +20,7 @@ public class ParticleGraveSmoke extends TransparentParticle {
   private final float rotIncrement;
 
   private ParticleGraveSmoke(SpriteSet spriteSet, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
-    super(level, x, y + 0.1d, z);
+    super(level, x, y + 0.1d, z, spriteSet);
     this.xd = motionX;
     this.yd = motionY;
     this.zd = motionZ;
@@ -34,7 +33,6 @@ public class ParticleGraveSmoke extends TransparentParticle {
     this.alphaStep = 0.08f / this.halfMaxAge;
     this.hasPhysics = false;
     setColor(0, .5F, .1F);
-    //    
     this.spriteSet = spriteSet;
     setSpriteFromAge(this.spriteSet);
   }
@@ -58,8 +56,8 @@ public class ParticleGraveSmoke extends TransparentParticle {
   }
 
   @Override
-  public ParticleRenderType getRenderType() {
-    return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+  protected SingleQuadParticle.Layer getLayer() {
+    return SingleQuadParticle.Layer.TRANSLUCENT;
   }
 
   public static class Factory implements ParticleProvider<SimpleParticleType> {
@@ -71,9 +69,8 @@ public class ParticleGraveSmoke extends TransparentParticle {
     }
 
     @Override
-    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
-      RandomSource rand = (level == null) ? RandomSource.createThreadSafe() : level.random;
-      return new ParticleGraveSmoke(this.spriteSet, level, x, y + 0.4d, z, (rand.nextFloat() - 0.5f) * 0.03d, 0d, (rand.nextFloat() - 0.5f) * 0.03d);
+    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ, RandomSource random) {
+      return new ParticleGraveSmoke(this.spriteSet, level, x, y + 0.4d, z, (random.nextFloat() - 0.5f) * 0.03d, 0d, (random.nextFloat() - 0.5f) * 0.03d);
     }
   }
 }

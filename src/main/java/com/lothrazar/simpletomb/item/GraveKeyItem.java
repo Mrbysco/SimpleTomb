@@ -20,21 +20,19 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.minecraft.world.entity.player.Inventory;
 
-import java.util.List;
+import java.util.function.Consumer;
 
-public class GraveKeyItem extends SwordItem {
+public class GraveKeyItem extends Item {
 
   public GraveKeyItem(Item.Properties properties) {
-    super(ToolMaterial.STONE, 3, -2.4F, properties.stacksTo(1).rarity(Rarity.UNCOMMON));
+    super(properties.stacksTo(1).rarity(Rarity.UNCOMMON).sword(ToolMaterial.STONE, 3, -2.4F));
   }
 
   @Override
@@ -53,15 +51,12 @@ public class GraveKeyItem extends SwordItem {
       else {
         canTp = (ConfigTomb.TPSURVIVAL.get() > 0 &&
             distance < ConfigTomb.TPSURVIVAL.get()) || ConfigTomb.TPSURVIVAL.get() == -1;
-        //-1 is magic value for ANY DISTANCE IS OK
       }
       if (canTp) {
         if (count <= 1) {
-          //teleport happens here
           player.teleportTo(tombPos.getX(), tombPos.getY(), tombPos.getZ());
         }
-        else if (level.isClientSide) {
-          //not done, and can TP
+        else if (level.isClientSide()) {
           ClientUtils.produceParticleCasting(entity, p -> !p.isUsingItem());
         }
       }
@@ -88,7 +83,6 @@ public class GraveKeyItem extends SwordItem {
       if (player.getItemInHand(context.getHand()).getItem() == TombRegistry.GRAVE_KEY.get()) {
         BlockState state = context.getLevel().getBlockState(pos);
         if (state.getBlock() instanceof BlockTomb) {
-          //open me
           BlockTomb.activatePlayerGrave(context.getLevel(), pos, state, player);
           return InteractionResult.SUCCESS;
         }
@@ -109,22 +103,20 @@ public class GraveKeyItem extends SwordItem {
   }
 
   @Override
-  
-  public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> list, TooltipFlag tooltipFlag) {
+  public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag tooltipFlag) {
     Level level = context.level();
-    if (level != null && level.isClientSide && net.minecraft.client.gui.screens.Screen.hasShiftDown()) {
+    if (level != null && level.isClientSide() && com.mojang.blaze3d.platform.InputConstants.isKeyDown(net.minecraft.client.Minecraft.getInstance().getWindow(), org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT)) {
       GlobalPos location = this.getTombPos(stack);
-      //      this.addItemPosition(list, this.getTombPos(stack));
       BlockPos pos = ClientUtils.getPlayerPos();
       if (pos != null && !location.equals(DeathHelper.ORIGIN)) {
         BlockPos tombPos = location.pos();
         int distance = (int) getDistance(tombPos, pos);
-        list.add(Component.translatable(MessageType.MESSAGE_DISTANCE.getKey(),
+        tooltipAdder.accept(Component.translatable(MessageType.MESSAGE_DISTANCE.getKey(),
             distance, tombPos.getX(), tombPos.getY(), tombPos.getZ(), WorldHelper.getDimensionName(location.dimension()))
             .withStyle(ChatFormatting.DARK_PURPLE));
       }
     }
-    super.appendHoverText(stack, context, list, tooltipFlag);
+    super.appendHoverText(stack, context, tooltipDisplay, tooltipAdder, tooltipFlag);
   }
 
   public boolean setTombPos(ItemStack stack, GlobalPos location) {
@@ -141,30 +133,27 @@ public class GraveKeyItem extends SwordItem {
         : DeathHelper.ORIGIN;
   }
 
-  /**
-   * Look for any key that matches this Location and remove that key from player
-   */
   public boolean removeKeyForGraveInInventory(Player player, GlobalPos graveLoc) {
-    IItemHandler itemHandler = player.getCapability(Capabilities.ItemHandler.ENTITY, null);
-    if (itemHandler != null) {
-      for (int i = 0; i < itemHandler.getSlots(); ++i) {
-        ItemStack stack = itemHandler.getStackInSlot(i);
-        if (stack.getItem() == TombRegistry.GRAVE_KEY.get() &&
-            TombRegistry.GRAVE_KEY.get().getTombPos(stack).equals(graveLoc)) {
-          itemHandler.extractItem(i, 1, false);
-          return true;
-        }
+    Inventory inv = player.getInventory();
+    for (int i = 0; i < inv.getContainerSize(); ++i) {
+      ItemStack stack = inv.getItem(i);
+      if (stack.getItem() == TombRegistry.GRAVE_KEY.get() &&
+          TombRegistry.GRAVE_KEY.get().getTombPos(stack).equals(graveLoc)) {
+        inv.removeItem(i, 1);
+        return true;
       }
     }
     return false;
   }
 
-  /**
-   * How many keys, ignoring data. casts long to int
-   */
   public int countKeyInInventory(Player player) {
-    return (int) player.getInventory().items.stream()
-        .filter(stack -> stack.getItem() == TombRegistry.GRAVE_KEY.get())
-        .count();
+    int count = 0;
+    Inventory inv = player.getInventory();
+    for (int i = 0; i < inv.getContainerSize(); i++) {
+      if (inv.getItem(i).getItem() == TombRegistry.GRAVE_KEY.get()) {
+        count++;
+      }
+    }
+    return count;
   }
 }
