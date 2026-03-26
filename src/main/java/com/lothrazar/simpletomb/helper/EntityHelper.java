@@ -2,17 +2,15 @@ package com.lothrazar.simpletomb.helper;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.fml.ModList;
-import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +23,7 @@ public class EntityHelper {
     if (stack.isEmpty()) {
       return false;
     }
-    ResourceLocation registryName = BuiltInRegistries.ITEM.getKey(stack.getItem()); //stack.getItem().getRegistryName();
+    Identifier registryName = BuiltInRegistries.ITEM.getKey(stack.getItem());
     if (registryName == null) {
       return false;
     }
@@ -33,43 +31,33 @@ public class EntityHelper {
       return false;
     }
     if (stack.getMaxStackSize() == 1) {
-      //
       if (ModList.get().isLoaded("curios")) {
-        //then go
         if (CuriosHelper.autoEquip(stack, player)) {
           return true;
         }
       }
-      //
       if (player.getOffhandItem().isEmpty()) {
-        if (stack.getItem().canPerformAction(stack, ItemAbilities.SHIELD_BLOCK)) { // && player.setSlot(99, stack.copy())) {
-          //          player.setItemInHand(InteractionHand.OFF_HAND, stack.copy());
+        if (stack.is(Items.SHIELD)) {
           player.setItemSlot(EquipmentSlot.OFFHAND, stack.copy());
-          //          player.getInventory().setItem(99, stack.copy());
           return true;
         }
       }
       EquipmentSlot slot = stack.getEquipmentSlot();
       boolean isElytra = false;
       if (slot == null) {
-        if (stack.getItem() instanceof ArmorItem) {
-          slot = stack.getEquipmentSlot();
+        if (!stack.is(Items.ELYTRA)) {
+          return false;
         }
-        else {
-          if (!stack.is(Items.ELYTRA)) {
-            return false;
-          }
-          slot = EquipmentSlot.CHEST;
-          isElytra = true;
-        }
+        slot = EquipmentSlot.CHEST;
+        isElytra = true;
       }
       else if (slot == EquipmentSlot.CHEST) {
         isElytra = stack.is(Items.ELYTRA);
       }
-      int slotId = slot.getIndex();
-      ItemStack stackInSlot = player.getInventory().armor.get(slotId);
+      int armorSlotIndex = 36 + slot.getIndex();
+      ItemStack stackInSlot = player.getInventory().getItem(armorSlotIndex);
       if (stackInSlot.isEmpty()) {
-        player.getInventory().armor.set(slotId, stack.copy());
+        player.getInventory().setItem(armorSlotIndex, stack.copy());
         return true;
       }
       if (slot != EquipmentSlot.CHEST) {
@@ -77,7 +65,7 @@ public class EntityHelper {
       }
       if (isElytra) {
         ItemHandlerHelper.giveItemToPlayer(player, stackInSlot.copy());
-        player.getInventory().armor.set(slotId, stack.copy());
+        player.getInventory().setItem(armorSlotIndex, stack.copy());
         return true;
       }
     }
@@ -89,14 +77,14 @@ public class EntityHelper {
   }
 
   public static boolean isValidPlayerMP(@Nullable Entity entity) {
-    return isValidPlayer(entity) && !entity.level().isClientSide;
+    return isValidPlayer(entity) && !entity.level().isClientSide();
   }
 
   public static CompoundTag getPersistentTag(Player player) {
     CompoundTag persistentData = player.getPersistentData();
     CompoundTag persistentTag;
     if (persistentData.contains(NBT_PLAYER_PERSISTED)) {
-      persistentTag = (CompoundTag) persistentData.get(NBT_PLAYER_PERSISTED);
+      persistentTag = persistentData.getCompoundOrEmpty(NBT_PLAYER_PERSISTED);
       return persistentTag;
     }
     else {

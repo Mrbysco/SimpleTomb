@@ -15,7 +15,7 @@ import java.util.Set;
 public class CuriosHelper {
 
   public static boolean autoEquip(ItemStack stack, Player player) {
-    Set<String> tags = CuriosSlotTypes.getItemSlotTypes(stack, player.level().isClientSide).keySet();
+    Set<String> tags = CuriosSlotTypes.getItemSlotTypes(stack, player.level().isClientSide()).keySet();
     ICuriosItemHandler handler = CuriosApi.getCuriosInventory(player).orElse(null);
     if (handler == null) {
       return false;
@@ -26,9 +26,7 @@ public class CuriosHelper {
       if (curioStacks != null) {
         IDynamicStackHandler current = curioStacks.getStacks();
         for (int s = 0; s < current.getSlots(); s++) {
-          // Do the thing
           stack = current.insertItem(s, stack, false);
-	        ModTomb.LOGGER.info("{} result {}", s, stack);
           if (stack.isEmpty()) {
             return true;
           }

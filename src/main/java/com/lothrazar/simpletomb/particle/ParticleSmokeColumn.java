@@ -6,7 +6,7 @@ import net.minecraft.client.particle.NoRenderParticle;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.core.particles.SimpleParticleType;
-
+import net.minecraft.util.RandomSource;
 
 public class ParticleSmokeColumn extends NoRenderParticle {
 
@@ -30,7 +30,7 @@ public class ParticleSmokeColumn extends NoRenderParticle {
   public static class Factory implements ParticleProvider<SimpleParticleType> {
 
     @Override
-    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
+    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ, RandomSource random) {
       return new ParticleSmokeColumn(level, x, y, z);
     }
   }

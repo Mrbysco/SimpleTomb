@@ -3,19 +3,18 @@ package com.lothrazar.simpletomb.particle;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.RandomSource;
 
-
-public class ParticleGraveSoul extends TextureSheetParticle {
+public class ParticleGraveSoul extends SingleQuadParticle {
 
   private final SpriteSet spriteSet;
   private final double radius, centerX, centerZ;
 
   private ParticleGraveSoul(SpriteSet spriteSet, ClientLevel level, double x, double y, double z, double radius) {
-    super(level, x, y + 0.85d, z);
+    super(level, x, y + 0.85d, z, spriteSet.get(0, 1));
     this.lifetime = 100;
     this.quadSize = 0.03f;
     this.centerX = x + 0.5d;
@@ -47,8 +46,8 @@ public class ParticleGraveSoul extends TextureSheetParticle {
   }
 
   @Override
-  public ParticleRenderType getRenderType() {
-    return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
+  protected SingleQuadParticle.Layer getLayer() {
+    return SingleQuadParticle.Layer.TRANSLUCENT;
   }
 
   public static class Factory implements ParticleProvider<SimpleParticleType> {
@@ -60,7 +59,7 @@ public class ParticleGraveSoul extends TextureSheetParticle {
     }
 
     @Override
-    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ) {
+    public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double motionX, double motionY, double motionZ, RandomSource random) {
       return new ParticleGraveSoul(this.spriteSet, level, x, y, z, 0.3d);
     }
   }

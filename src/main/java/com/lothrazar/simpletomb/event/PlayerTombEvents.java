@@ -20,12 +20,14 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -33,7 +35,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDestroyBlockEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
@@ -72,11 +73,10 @@ public class PlayerTombEvents {
   public void onPlayerLogged(PlayerEvent.PlayerLoggedInEvent event) {
     if (EntityHelper.isValidPlayerMP(event.getEntity())) {
       ServerPlayer player = (ServerPlayer) event.getEntity();
-      assert player.getServer() != null;
       CompoundTag playerData = player.getPersistentData();
       CompoundTag persistantData;
       if (playerData.contains(EntityHelper.NBT_PLAYER_PERSISTED)) {
-        persistantData = playerData.getCompound(EntityHelper.NBT_PLAYER_PERSISTED);
+        persistantData = playerData.getCompoundOrEmpty(EntityHelper.NBT_PLAYER_PERSISTED);
       }
       else {
         persistantData = new CompoundTag();
@@ -102,10 +102,12 @@ public class PlayerTombEvents {
     Player player = event.getEntity();
     if (EntityHelper.isValidPlayerMP(player) && !player.isSpectator()) {
       CompoundTag persistentTag = EntityHelper.getPersistentTag(player);
-      ListTag stackList = persistentTag.getList(TB_SOULBOUND_STACKS, 10);
+      ListTag stackList = persistentTag.getListOrEmpty(TB_SOULBOUND_STACKS);
       for (int i = 0; i < stackList.size(); ++i) {
-        //        ItemStack.
-        ItemStack stack = ItemStack.parseOptional(player.registryAccess(), stackList.getCompound(i));
+        ItemStack stack = ItemStack.CODEC.parse(
+            player.registryAccess().createSerializationContext(NbtOps.INSTANCE),
+            stackList.getCompoundOrEmpty(i)
+        ).result().orElse(ItemStack.EMPTY);
         if (!stack.isEmpty()) {
           ItemHandlerHelper.giveItemToPlayer(player, stack);
         }
@@ -117,9 +119,13 @@ public class PlayerTombEvents {
 
   private void storeSoulboundsOnBody(Player player, List<ItemStack> keys) {
     CompoundTag persistentTag = EntityHelper.getPersistentTag(player);
-    ListTag stackList = persistentTag.contains(TB_SOULBOUND_STACKS) ? persistentTag.getList(TB_SOULBOUND_STACKS, CompoundTag.TAG_COMPOUND) : new ListTag();
+    ListTag stackList = persistentTag.contains(TB_SOULBOUND_STACKS) ? persistentTag.getListOrEmpty(TB_SOULBOUND_STACKS) : new ListTag();
     for (ItemStack key : keys) {
-      stackList.add(key.saveOptional(player.registryAccess()));
+      Tag encoded = ItemStack.CODEC.encodeStart(
+          player.registryAccess().createSerializationContext(NbtOps.INSTANCE),
+          key
+      ).result().orElse(new CompoundTag());
+      stackList.add(encoded);
     }
     persistentTag.put(TB_SOULBOUND_STACKS, stackList);
     keys.clear();
@@ -133,26 +139,31 @@ public class PlayerTombEvents {
     }
     if (!event.isCanceled()) {
       Player player = (Player) event.getEntity();
+      Inventory inventory = player.getInventory();
       PartEnum part = ConfigTomb.KEEPPARTS.get();
       switch (part) {
         case HOTBAR -> {
           List<ItemStack> hotbarStacks = new ArrayList<>();
           for (int i = 0; i < 9; i++) {
-            hotbarStacks.add(i, player.getInventory().items.get(i));
+            hotbarStacks.add(i, inventory.getItem(i));
           }
           keepingMap.put(player.getUUID(), hotbarStacks);
         }
         case ARMOR -> {
           List<ItemStack> armorStacks = new ArrayList<>();
-          player.getInventory().armor.forEach(armorStacks::add);
+          for (int i = 0; i < 4; i++) {
+            armorStacks.add(inventory.getItem(36 + i));
+          }
           keepingMap.put(player.getUUID(), armorStacks);
         }
         case HOTBAR_AND_ARMOR -> {
           List<ItemStack> stacks = new ArrayList<>();
           for (int i = 0; i < 9; i++) {
-            stacks.add(i, player.getInventory().items.get(i));
+            stacks.add(i, inventory.getItem(i));
           }
-          player.getInventory().armor.forEach(stacks::add);
+          for (int i = 0; i < 4; i++) {
+            stacks.add(inventory.getItem(36 + i));
+          }
           keepingMap.put(player.getUUID(), stacks);
         }
         case NONE -> {}
@@ -186,10 +197,7 @@ public class PlayerTombEvents {
   public void onSaveFile(PlayerEvent.SaveToFile event) {
     Player player = event.getEntity();
     File mctomb = new File(event.getPlayerDirectory(), player.getUUID() + TOMB_FILE_EXT);
-    //
-    //save player data to the file
     if (grv.containsKey(player.getUUID())) {
-      //yes i have data to save
       PlayerTombRecords dataToSave = grv.get(player.getUUID());
       CompoundTag data = dataToSave.write();
       try {
@@ -214,52 +222,46 @@ public class PlayerTombEvents {
         fileinputstream.close();
         PlayerTombRecords dataLoaded = new PlayerTombRecords();
         dataLoaded.read(data, player.getUUID());
-        if (grv.containsKey(player.getUUID())) {
-          //overwrite list
-          grv.put(player.getUUID(), dataLoaded);
-        }
-        else {
-          //set list
-          grv.put(player.getUUID(), dataLoaded);
-        }
+        grv.put(player.getUUID(), dataLoaded);
       }
       catch (Exception e) {
         ModTomb.LOGGER.error("IO", e);
       }
     }
-    //LOAD player data
   }
 
   private void saveBackup(LivingDropsEvent event) {
     ServerPlayer player = (ServerPlayer) event.getEntity();
-    //    ServerWorld world = player.getServerWorld();
     Iterator<ItemEntity> it = event.getDrops().iterator();
     ListTag drops = new ListTag();
-    boolean isEmpty = true; //empty unless one non-key item found
+    boolean isEmpty = true;
     CompoundTag tombstoneTag = new CompoundTag();
     while (it.hasNext()) {
       ItemEntity entityItem = it.next();
       if (entityItem != null && !entityItem.getItem().isEmpty()) {
         ItemStack stack = entityItem.getItem();
-        //        stuff.add(stack);
-        drops.add(stack.save(event.getEntity().registryAccess(), new CompoundTag()));
+        Tag encoded = ItemStack.CODEC.encodeStart(
+            event.getEntity().registryAccess().createSerializationContext(NbtOps.INSTANCE),
+            stack
+        ).result().orElse(new CompoundTag());
+        drops.add(encoded);
         if (stack.getItem() != TombRegistry.GRAVE_KEY.get()) {
           isEmpty = false;
         }
       }
     }
     if (!isEmpty) {
-      //NEW data model. write to string
-      //timestamp
       tombstoneTag.putLong("timestamp", System.currentTimeMillis());
       tombstoneTag.put("drops", drops);
-      tombstoneTag.put("pos", NbtUtils.writeBlockPos(player.blockPosition()));
-      tombstoneTag.putString("dimension", player.level().dimension().location().toString());
+      Tag posTag = BlockPos.CODEC.encodeStart(
+          player.registryAccess().createSerializationContext(NbtOps.INSTANCE),
+          player.blockPosition()
+      ).result().orElse(new CompoundTag());
+      tombstoneTag.put("pos", posTag);
+      tombstoneTag.putString("dimension", player.level().dimension().identifier().toString());
       UUID pid = player.getUUID();
       tombstoneTag.putString("playerid", pid.toString());
       tombstoneTag.putString("playername", player.getDisplayName().getString());
-      //    world.getSavedData().ge
-      //save to file
       if (grv.containsKey(pid)) {
         grv.get(pid).playerGraves.add(tombstoneTag);
       }
@@ -271,7 +273,7 @@ public class PlayerTombEvents {
 
   private void placeTombstone(LivingDropsEvent event) {
     ServerPlayer player = (ServerPlayer) event.getEntity();
-    ServerLevel level = player.serverLevel();
+    ServerLevel level = (ServerLevel) player.level();
     Iterator<ItemEntity> it = event.getDrops().iterator();
     ArrayList<ItemStack> keys = new ArrayList<>();
     while (it.hasNext()) {
@@ -294,7 +296,6 @@ public class PlayerTombEvents {
     BlockPos initPos = WorldHelper.getInitialPos(level, new BlockPos(player.blockPosition()));
     GlobalPos spawnPos = WorldHelper.findGraveSpawn(player, initPos);
     if (spawnPos == null || spawnPos.pos() == null) {
-      //found a block but its not air, cant use it
       MessageType.MESSAGE_NO_PLACE_FOR_GRAVE.sendSpecialMessage(player);
       ModTomb.LOGGER.log(Level.INFO, MessageType.MESSAGE_NO_PLACE_FOR_GRAVE.getTranslation());
       return;
@@ -307,15 +308,12 @@ public class PlayerTombEvents {
       return;
     }
     BlockEntity tile = level.getBlockEntity(spawnPos.pos());
-    IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, spawnPos.pos(), null);
-    if (!(tile instanceof BlockEntityTomb grave)
-        || itemHandler == null) {
-      //either block failed to place, or tile entity wasnt started somehow
+    if (!(tile instanceof BlockEntityTomb grave)) {
       sendFailMessage(player);
       return;
     }
-    //else grave success
     grave.initTombstoneOwner(player);
+    IItemHandler itemHandler = grave.getHandler(null);
     if (ConfigTomb.KEYGIVEN.get()) {
       ItemStack key = new ItemStack(TombRegistry.GRAVE_KEY.get());
       TombRegistry.GRAVE_KEY.get().setTombPos(key, spawnPos);
@@ -323,7 +321,6 @@ public class PlayerTombEvents {
       keys.add(key);
     }
     this.storeSoulboundsOnBody(player, keys);
-    // we know itemHandler is not null now
     for (ItemEntity entityItem : event.getDrops()) {
       if (!entityItem.getItem().isEmpty()) {
         ItemHandlerHelper.insertItemStacked(itemHandler, entityItem.getItem().copy(), false);
@@ -335,10 +332,9 @@ public class PlayerTombEvents {
       entityItem.setItem(ItemStack.EMPTY);
     }
     level.sendBlockUpdated(spawnPos.pos(), state, state, 2);
-    //it has been placed
     DeathHelper.INSTANCE.putLastGrave(player, spawnPos);
     if (ConfigTomb.TOMBLOG.get()) {
-	    ModTomb.LOGGER.info("{}{}", MessageType.MESSAGE_NEW_GRAVE.getTranslation(), String.format("(%d, %d, %d) " + spawnPos.dimension(), spawnPos.pos().getX(), spawnPos.pos().getY(), spawnPos.pos().getZ()));
+	    ModTomb.LOGGER.info("{}{}", MessageType.MESSAGE_NEW_GRAVE.getTranslation(), String.format("(%d, %d, %d) %s", spawnPos.pos().getX(), spawnPos.pos().getY(), spawnPos.pos().getZ(), WorldHelper.getDimensionName(spawnPos.dimension()).getString()));
     }
     if (ConfigTomb.TOMBCHAT.get()) {
       MessageType.MESSAGE_NEW_GRAVE.sendSpecialMessage(player, String.format("(%d, %d, %d) " + WorldHelper.getDimensionName(spawnPos.dimension()).getString(),
@@ -366,7 +362,6 @@ public class PlayerTombEvents {
   }
 
   static BlockState getRandomGrave(ServerLevel serverLevel, Direction facing) {
-    //TODO: CONFIG or other selection of what the player wants
     BlockTomb[] graves = new BlockTomb[] {
         TombRegistry.GRAVE_SIMPLE.get(),
         TombRegistry.GRAVE_NORMAL.get(),

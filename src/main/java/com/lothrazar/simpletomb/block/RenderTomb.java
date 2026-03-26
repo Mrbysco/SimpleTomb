@@ -2,60 +2,67 @@ package com.lothrazar.simpletomb.block;
 
 import com.lothrazar.simpletomb.data.MessageType;
 import com.lothrazar.simpletomb.helper.WorldHelper;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemDisplayContext;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.Nullable;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb, TombRenderState> {
 
-public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
-
-  private static final ResourceLocation SKELETON_HEAD = ResourceLocation.withDefaultNamespace("textures/entity/skeleton/skeleton.png");
   private final Font font;
-  private final ItemRenderer itemRenderer;
 
   public RenderTomb(BlockEntityRendererProvider.Context cx) {
-    this.font = cx.getFont();
-	this.itemRenderer = cx.getItemRenderer();
+    this.font = cx.font();
   }
 
   private static final String TIME_FORMAT = "HH:mm:ss";
   private static final String DATE_FORMAT = "yyyy/MM/dd";
 
   @Override
-  public void render(BlockEntityTomb te, float partialTicks, PoseStack poseStack,
-      MultiBufferSource bufferSource, int light, int destroyStage) {
-    if (te == null) {
+  public TombRenderState createRenderState() {
+    return new TombRenderState();
+  }
+
+  @Override
+  public void extractRenderState(BlockEntityTomb te, TombRenderState state, float partialTick, Vec3 cameraPos, ModelFeatureRenderer.@Nullable CrumblingOverlay crumblingOverlay) {
+    BlockEntityRenderer.super.extractRenderState(te, state, partialTick, cameraPos, crumblingOverlay);
+    state.hasOwner = te.hasOwner();
+    state.ownerName = te.getOwnerName();
+    state.deathDate = te.getOwnerDeathTime();
+    state.timer = te.timer;
+    if (te.getLevel() != null) {
+      BlockState knownState = te.getLevel().getBlockState(te.getBlockPos());
+      if (knownState.getBlock() instanceof BlockTomb grave) {
+        state.facing = knownState.getValue(BlockTomb.FACING);
+        state.graveModel = grave.getGraveType();
+      }
+      state.isNight = WorldHelper.isNight(te.getLevel());
+    }
+  }
+
+  @Override
+  public void submit(TombRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
+    if (!state.hasOwner) {
       return;
     }
-    if (!te.hasOwner()) {
-      return;
-    }
-    BlockState knownState = te.getLevel().getBlockState(te.getBlockPos());
-    if (!(knownState.getBlock() instanceof BlockTomb grave)) {
-      return;
-    }
-    Direction facing = knownState.getValue(BlockTomb.FACING);
-    ModelTomb graveModel = grave.getGraveType();
-    renderHalloween(poseStack, bufferSource, graveModel, facing, light, WorldHelper.isNight(te.getLevel()));
-    light = 0xf000f0;
+    Direction facing = state.facing;
+    ModelTomb graveModel = state.graveModel;
+    int light = 0xf000f0;
     int rotationIndex;
     float modX = 0.5F, modY, modZ = 0.5F;
     float value;
@@ -133,25 +140,23 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
         break;
       }
     }
-    poseStack.mulPose(Axis.YP.rotationDegrees(-90f * rotationIndex)); // horizontal rot
+    poseStack.mulPose(Axis.YP.rotationDegrees(-90f * rotationIndex));
+    MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
     Font fontRender = this.font;
     int textColor = 0xFFFFFFFF;
-    // rip message
     showString(ChatFormatting.BOLD + MessageType.MESSAGE_RIP.getTranslation(), poseStack, bufferSource, fontRender, 0,
         textColor, 0.007f, light);
-    // owner message
-    showString(ChatFormatting.BOLD + te.getOwnerName(), poseStack, bufferSource, fontRender, 11, textColor, 0.005f, light);
-    // death date message
+    showString(ChatFormatting.BOLD + state.ownerName, poseStack, bufferSource, fontRender, 11, textColor, 0.005f, light);
     float scaleForDate = 0.004f;
-    // time goes 72 times faster than real time
-    long days = te.timer / 24000; // TODO incorrect, tiles don't always tick, store gametime
+    long days = state.timer / 24000;
     String dateString = MessageType.MESSAGE_DAY.getTranslation(days);
     showString(ChatFormatting.BOLD + dateString, poseStack, bufferSource, fontRender, 20, textColor, scaleForDate, light);
-    Date date = new Date(te.getOwnerDeathTime());
+    Date date = new Date(state.deathDate);
     String fdateString = new SimpleDateFormat(DATE_FORMAT).format(date);
     String timeString = new SimpleDateFormat(TIME_FORMAT).format(date);
     showString(ChatFormatting.BOLD + fdateString, poseStack, bufferSource, fontRender, 36, textColor, scaleForDate, light);
     showString(ChatFormatting.BOLD + timeString, poseStack, bufferSource, fontRender, 46, textColor, scaleForDate, light);
+    bufferSource.endBatch();
     poseStack.popPose();
   }
 
@@ -160,56 +165,6 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb> {
     poseStack.scale(scale, scale, scale);
     font.drawInBatch(content, (float) -font.width(content) / 2, posY - 30, color, false, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, light);
     poseStack.popPose();
-  }
-
-  private void renderHalloween(PoseStack poseStack, MultiBufferSource bufferSource, ModelTomb graveModel, Direction facing, int light, boolean isNight) {
-    //    RenderSystem.enableRescaleNormal();
-    RenderSystem.disableCull();
-    //    RenderSystem.enableAlphaTest();
-    float decoX = 0.5f, decoY = 0.07f, decoZ = 0.5f;
-    switch (graveModel) {
-      case GRAVE_NORMAL:
-        decoY += 0.35f;
-      break;
-      case GRAVE_CROSS:
-        if (facing == Direction.SOUTH) {
-          decoX -= 0.2f;
-        }
-        else if (facing == Direction.WEST) {
-          decoZ -= 0.2f;
-        }
-        else if (facing == Direction.EAST) {
-          decoZ += 0.2f;
-        }
-        else {
-          decoX += 0.2f;
-        }
-      break;
-      case GRAVE_SIMPLE:
-      default:
-        decoY += 0.1f;
-      break;
-    }
-//    Minecraft.getInstance().getTextureManager().bindForSetup(SKELETON_HEAD);
-    poseStack.pushPose();
-    poseStack.translate(decoX, decoY, decoZ);
-    poseStack.mulPose(Axis.YP.rotationDegrees(facing.toYRot() + (facing == Direction.SOUTH || facing == Direction.NORTH ? 180 : 0)));
-    if (graveModel == ModelTomb.GRAVE_NORMAL || graveModel == ModelTomb.GRAVE_SIMPLE) {
-      poseStack.scale(0.2f, 0.2f, 0.2f);
-      ItemStack stack = new ItemStack(isNight ? Blocks.JACK_O_LANTERN : Blocks.PUMPKIN);
-	  itemRenderer.renderStatic(stack, ItemDisplayContext.NONE, 15728880, OverlayTexture.NO_OVERLAY, poseStack, bufferSource, Minecraft.getInstance().level, 0);
-    }
-    else {
-      poseStack.scale(0.3f, 0.3f, 0.3f);
-      //      SkullBlock.Type skullblock$type = ((AbstractSkullBlock)block).getType();
-      //      SkullModelBase skullmodelbase = this.skullModels.get(skullblock$type);
-      //      RenderType rendertype = SkullBlockRenderer.getRenderType(skullblock$type, gameprofile);
-      //      SkullBlockRenderer.renderSkull((Direction)null, 180.0F, 0.0F, p_108832_, p_108833_, p_108834_, skullmodelbase, rendertype);
-      // TODO:::
-      //      SkullBlockRenderer.renderSkull(null, 1f, SkullBlock.Types.SKELETON, null, 0f, matrixStack, iRenderTypeBuffer, isNight ? 0xf000f0 : light);
-    }
-    poseStack.popPose();
-    //    RenderSystem.popMatrix();
   }
 
   @Override

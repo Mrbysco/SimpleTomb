@@ -1,26 +1,17 @@
 package com.lothrazar.simpletomb.particle;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.particle.ParticleRenderType;
-import net.minecraft.client.particle.TextureSheetParticle;
+import net.minecraft.client.particle.SingleQuadParticle;
+import net.minecraft.client.particle.SpriteSet;
 
-public class TransparentParticle extends TextureSheetParticle {
+public class TransparentParticle extends SingleQuadParticle {
 
-  protected TransparentParticle(ClientLevel level, double x, double y, double z) {
-    super(level, x, y, z);
+  protected TransparentParticle(ClientLevel level, double x, double y, double z, SpriteSet spriteSet) {
+    super(level, x, y, z, spriteSet.get(0, 1));
   }
 
   @Override
-  public ParticleRenderType getRenderType() {
-    return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
-  }
-
-  @Override
-  public void render(VertexConsumer buffer, Camera renderInfo, float partialTicks) {
-    RenderSystem.depthMask(false);
-    super.render(buffer, renderInfo, partialTicks);
+  protected SingleQuadParticle.Layer getLayer() {
+    return SingleQuadParticle.Layer.TRANSLUCENT;
   }
 }

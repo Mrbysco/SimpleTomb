@@ -1,17 +1,16 @@
 package com.lothrazar.simpletomb.particle;
 
-import com.lothrazar.simpletomb.ModTomb;
 import com.lothrazar.simpletomb.helper.WorldHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.particle.SingleQuadParticle;
+import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Predicate;
 
-public class ParticleCasting extends CustomParticle {
+public class ParticleCasting extends SingleQuadParticle {
 
-  private static final ResourceLocation COMMON_TEXTURE = ResourceLocation.fromNamespaceAndPath(ModTomb.MODID, "textures/particle/casting.png");
   private final LivingEntity caster;
   private final Predicate<LivingEntity> predic;
   private final double radius = 1.1;
@@ -22,8 +21,8 @@ public class ParticleCasting extends CustomParticle {
   private final float colorB;
   private boolean goUp;
 
-  public ParticleCasting(ClientLevel level, LivingEntity caster, Predicate<LivingEntity> predic, double addY, double angle) {
-    super(level, caster.getX(), caster.getY() + addY, caster.getZ());
+  public ParticleCasting(ClientLevel level, LivingEntity caster, Predicate<LivingEntity> predic, double addY, double angle, SpriteSet spriteSet) {
+    super(level, caster.getX(), caster.getY() + addY, caster.getZ(), spriteSet.get(0, 1));
     this.xd = this.yd = this.zd = 0d;
     setAlpha(1f);
     this.goUp = addY < 1d;
@@ -75,7 +74,7 @@ public class ParticleCasting extends CustomParticle {
   }
 
   @Override
-  ResourceLocation getTexture() {
-    return COMMON_TEXTURE;
+  protected Layer getLayer() {
+    return Layer.TRANSLUCENT;
   }
 }

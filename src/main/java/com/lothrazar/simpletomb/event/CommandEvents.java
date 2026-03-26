@@ -6,7 +6,6 @@ import com.lothrazar.simpletomb.block.BlockEntityTomb;
 import com.lothrazar.simpletomb.data.PlayerTombRecords;
 import com.lothrazar.simpletomb.data.TombCommands;
 import com.lothrazar.simpletomb.helper.WorldHelper;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -29,11 +28,11 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
@@ -50,7 +49,7 @@ public class CommandEvents {
   public void onRegisterCommandsEvent(RegisterCommandsEvent event) {
     CommandDispatcher<CommandSourceStack> r = event.getDispatcher();
     r.register(LiteralArgumentBuilder.<CommandSourceStack> literal(ModTomb.MODID)
-        .requires((p) -> p.hasPermission(3))
+        .requires((p) -> p.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_ADMIN))
         .then(Commands.literal(TombCommands.RESTORE.toString())
             .then(Commands.argument(ARG_PLAYER, GameProfileArgument.gameProfile()).suggests((cs, b) -> buildPlayerArg(cs, b))
                 .then(Commands.argument(ARG_SELECTED, IntegerArgumentType.integer())
@@ -73,20 +72,19 @@ public class CommandEvents {
                 .executes(x -> {
                   return exeDelete(x, getPlayerProfile(x));
                 })))
-    // more go here
     );
   }
 
   private CompletableFuture<Suggestions> buildPlayerArg(CommandContext<CommandSourceStack> cs, SuggestionsBuilder b) {
-    return SharedSuggestionProvider.suggest(cs.getSource().getServer().getPlayerList().getPlayers().stream().map(p -> p.getGameProfile().getName()), b);
+    return SharedSuggestionProvider.suggest(cs.getSource().getServer().getPlayerList().getPlayers().stream().map(p -> p.getGameProfile().name()), b);
   }
 
-  private GameProfile getPlayerProfile(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+  private NameAndId getPlayerProfile(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
     return GameProfileArgument.getGameProfiles(ctx, ARG_PLAYER).stream().findFirst().orElse(null);
   }
 
-  private int exeDelete(CommandContext<CommandSourceStack> ctx, GameProfile target) throws CommandSyntaxException {
-    PlayerTombRecords found = ModTomb.GLOBAL.findGrave(target.getId());
+  private int exeDelete(CommandContext<CommandSourceStack> ctx, NameAndId target) throws CommandSyntaxException {
+    PlayerTombRecords found = ModTomb.GLOBAL.findGrave(target.id());
     if (found != null) {
       int previous = found.playerGraves.size();
       found.deleteAll();
@@ -97,8 +95,8 @@ public class CommandEvents {
     return 0;
   }
 
-  private int exeList(CommandContext<CommandSourceStack> ctx, GameProfile target) throws CommandSyntaxException {
-    PlayerTombRecords found = ModTomb.GLOBAL.findGrave(target.getId());
+  private int exeList(CommandContext<CommandSourceStack> ctx, NameAndId target) throws CommandSyntaxException {
+    PlayerTombRecords found = ModTomb.GLOBAL.findGrave(target.id());
     if (found != null && found.playerGraves.size() > 0) {
       for (int i = 0; i < found.playerGraves.size(); i++) {
         MutableComponent msg = Component.translatable(found.toDisplayString(i, ctx.getSource().registryAccess()));
@@ -114,8 +112,8 @@ public class CommandEvents {
     return 0;
   }
 
-  private int exeKey(CommandContext<CommandSourceStack> ctx, GameProfile target, int index) throws CommandSyntaxException {
-    PlayerTombRecords found = ModTomb.GLOBAL.findGrave(target.getId());
+  private int exeKey(CommandContext<CommandSourceStack> ctx, NameAndId target, int index) throws CommandSyntaxException {
+    PlayerTombRecords found = ModTomb.GLOBAL.findGrave(target.id());
     if (found != null) {
       CompoundTag grave = found.playerGraves.get(index);
       if (grave == null) {
@@ -125,19 +123,18 @@ public class CommandEvents {
       GlobalPos spawnPos = new GlobalPos(PlayerTombRecords.getDim(grave), PlayerTombRecords.getPos(grave));
       ItemStack key = new ItemStack(TombRegistry.GRAVE_KEY.get());
       TombRegistry.GRAVE_KEY.get().setTombPos(key, spawnPos);
-      PlayerTombEvents.putKeyName(target.getName(), key);
-      // key for u
-      MutableComponent msg = Component.translatable("Attempting to give the key for tomb [" + index + "] to player " + target.getName() + ":" + target.getId());
+      PlayerTombEvents.putKeyName(target.name(), key);
+      MutableComponent msg = Component.translatable("Attempting to give the key for tomb [" + index + "] to player " + target.name() + ":" + target.id());
       ctx.getSource().sendSuccess(() -> msg, false);
-      ServerPlayer user = ctx.getSource().getServer().getPlayerList().getPlayer(target.getId());
+      ServerPlayer user = ctx.getSource().getServer().getPlayerList().getPlayer(target.id());
       ItemHandlerHelper.giveItemToPlayer(user, key);
     }
     return 0;
   }
 
-  private int exeRestore(CommandContext<CommandSourceStack> ctx, GameProfile target, int index) throws CommandSyntaxException {
-    ctx.getSource().sendSuccess(() -> Component.translatable("Attempting to restore tomb [" + index + "] for player " + target.getName() + ":" + target.getId()), false);
-    PlayerTombRecords found = ModTomb.GLOBAL.findGrave(target.getId());
+  private int exeRestore(CommandContext<CommandSourceStack> ctx, NameAndId target, int index) throws CommandSyntaxException {
+    ctx.getSource().sendSuccess(() -> Component.translatable("Attempting to restore tomb [" + index + "] for player " + target.name() + ":" + target.id()), false);
+    PlayerTombRecords found = ModTomb.GLOBAL.findGrave(target.id());
     if (found != null) {
       CompoundTag grave = found.playerGraves.get(index);
       if (grave == null) {
@@ -146,34 +143,23 @@ public class CommandEvents {
       }
       BlockPos pos = PlayerTombRecords.getPos(grave);
       ResourceKey<Level> dim = PlayerTombRecords.getDim(grave);
-      //      ModTomb.LOGGER.error("found  at" + pos + " in " + dim);
       List<ItemStack> drops = PlayerTombRecords.getDrops(grave, ctx.getSource().registryAccess());
-      //      ModTomb.LOGGER.error("items contained " + drops.size());
-      //TODO: is this dupe code from location class?
       ServerLevel targetWorld = ctx.getSource().getServer().getLevel(dim);
       BlockState state = PlayerTombEvents.getRandomGrave(targetWorld, Direction.NORTH);
       boolean wasPlaced = WorldHelper.placeGrave(targetWorld, pos, state);
       if (wasPlaced) {
-        //fill it up
         BlockEntityTomb tile = (BlockEntityTomb) targetWorld.getBlockEntity(pos);
         tile.initTombstoneOwner(target);
-        IItemHandler itemHandler = targetWorld.getCapability(Capabilities.ItemHandler.BLOCK, pos, null);
-        //        ItemHandlerHelper.ins
+        IItemHandler itemHandler = tile.getHandler(null);
         for (ItemStack d : drops) {
           ItemHandlerHelper.insertItemStacked(itemHandler, d.copy(), false);
         }
       }
       ctx.getSource().sendSuccess(() -> Component.literal("Restored tomb with at [")
               .append(Component.literal(pos.toShortString()).withStyle(ChatFormatting.YELLOW)).append("] in ")
-              .append(Component.translatable(dim.location().toLanguageKey("dimension")).withStyle(ChatFormatting.GOLD))
+              .append(Component.translatable(dim.identifier().toLanguageKey("dimension")).withStyle(ChatFormatting.GOLD))
               .withStyle(ChatFormatting.GREEN), false);
     }
     return 0;
   }
-  //
-  //  private void badCommandMsg(ServerPlayerEntity player) {
-  //    //.setStyle(Style.EMPTY.setFormatting(TextFormatting.GOLD))
-  //    player.sendMessage(new TranslationTextComponent(ModTomb.MODID + ".commands.null"), player.getUniqueID());
-  //    player.sendMessage(new TranslationTextComponent("[" + String.join(", ", SUBCOMMANDS) + "]"), player.getUniqueID());
-  //  }
 }
