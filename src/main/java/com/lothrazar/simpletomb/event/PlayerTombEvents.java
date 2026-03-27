@@ -110,8 +110,8 @@ public class PlayerTombEvents {
             player.registryAccess().createSerializationContext(NbtOps.INSTANCE),
             stackList.getCompoundOrEmpty(i)
         ).result().orElse(ItemStack.EMPTY);
-        if (!stack.isEmpty()) {
-          player.getInventory().add(stack);
+        if (!stack.isEmpty() && !player.getInventory().add(stack)) {
+          player.spawnAtLocation(stack);
         }
       }
       persistentTag.remove(TB_SOULBOUND_STACKS);
