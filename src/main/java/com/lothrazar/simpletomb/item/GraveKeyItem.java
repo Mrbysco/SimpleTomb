@@ -49,8 +49,8 @@ public class GraveKeyItem extends Item {
         canTp = ConfigTomb.TPCREATIVE.get();
       }
       else {
-        canTp = (ConfigTomb.TPSURVIVAL.get() > 0 &&
-            distance < ConfigTomb.TPSURVIVAL.get()) || ConfigTomb.TPSURVIVAL.get() == -1;
+        canTp = ConfigTomb.TPSURVIVAL.get() == 0 ||
+            (ConfigTomb.TPSURVIVAL.get() > 0 && distance < ConfigTomb.TPSURVIVAL.get());
       }
       if (canTp) {
         if (count <= 1) {

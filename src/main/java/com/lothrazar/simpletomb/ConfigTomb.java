@@ -52,9 +52,9 @@ public class ConfigTomb {
     //done    
     BUILDER.comment(WALL).push("teleport");
     TPSURVIVAL = BUILDER.comment("\r\nWhen survival player is within this (straight line calculated) distance from the tomb, they can teleport to the tomb.  "
-        + "Set as zero (0) to disable survival TP feature.  "
-        + " Set as negative one (-1) to allow survival teleportation always and ignore the distance (within dimension) ")
-        .defineInRange("survival", 16, -1, 128);
+        + "Set as zero (0) to allow survival teleportation always and ignore the distance (within dimension).  "
+        + "Set as one (1) to effectively disable survival TP feature. ")
+        .defineInRange("survival", 16, 0, 10000);
     TPCREATIVE = BUILDER.comment("\r\nIf creative mode players can teleport to the tomb with the key, ignoring distance")
         .define("creative", true);
     BUILDER.pop();
