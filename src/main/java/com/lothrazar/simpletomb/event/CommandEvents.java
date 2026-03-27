@@ -34,8 +34,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -127,7 +129,9 @@ public class CommandEvents {
       MutableComponent msg = Component.translatable("Attempting to give the key for tomb [" + index + "] to player " + target.name() + ":" + target.id());
       ctx.getSource().sendSuccess(() -> msg, false);
       ServerPlayer user = ctx.getSource().getServer().getPlayerList().getPlayer(target.id());
-      ItemHandlerHelper.giveItemToPlayer(user, key);
+      if (user != null && !user.getInventory().add(key)) {
+        user.spawnAtLocation(user.level(), key);
+      }
     }
     return 0;
   }
@@ -150,9 +154,11 @@ public class CommandEvents {
       if (wasPlaced) {
         BlockEntityTomb tile = (BlockEntityTomb) targetWorld.getBlockEntity(pos);
         tile.initTombstoneOwner(target);
-        IItemHandler itemHandler = tile.getHandler(null);
-        for (ItemStack d : drops) {
-          ItemHandlerHelper.insertItemStacked(itemHandler, d.copy(), false);
+        ItemStacksResourceHandler handler = tile.getHandler(null);
+        try (var tx = Transaction.openRoot()) {
+          for (ItemStack d : drops) {
+            ResourceHandlerUtil.insertStacking(handler, ItemResource.of(d), d.count(), tx);
+          }
         }
       }
       ctx.getSource().sendSuccess(() -> Component.literal("Restored tomb with at [")
