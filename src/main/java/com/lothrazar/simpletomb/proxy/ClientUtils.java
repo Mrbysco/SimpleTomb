@@ -36,7 +36,9 @@ public class ClientUtils {
   }
 
   public static void produceGraveSmoke(Level level, double x, double y, double z) {
-    Minecraft.getInstance().particleEngine.createParticle(TombRegistry.GRAVE_SMOKE.get(), x + level.random.nextGaussian(), y, z + level.random.nextGaussian(), 0d, 0d, 0d);
+    Minecraft.getInstance().particleEngine.createParticle(TombRegistry.GRAVE_SMOKE.get(),
+            x + level.getRandom().nextGaussian(), y, z + level.getRandom().nextGaussian(),
+            0d, 0d, 0d);
   }
 
   public static void produceGraveSoul(Level level, BlockPos pos) {

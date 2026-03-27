@@ -20,7 +20,7 @@ public class ParticleRotatingSmoke extends TransparentParticle {
     scale(2f);
     setLifetime(100);
     this.hasPhysics = false;
-    this.oRoll = this.roll = (float) (level.random.nextFloat() * Math.PI * 2f);
+    this.oRoll = this.roll = (float) (level.getRandom().nextFloat() * Math.PI * 2f);
     this.rotIncrement = (float) (Math.PI * 0.02f);
     setColor(0.7f, 0.7f, 0.7f);
     this.spriteSet = spriteSet;
@@ -30,7 +30,7 @@ public class ParticleRotatingSmoke extends TransparentParticle {
   private void updatePosition() {
     this.oRoll = this.roll;
     this.roll += this.rotIncrement;
-    float color = 0.6f + this.level.random.nextFloat() * 0.2f;
+    float color = 0.6f + this.level.getRandom().nextFloat() * 0.2f;
     setColor(color, color, color);
   }
 
@@ -44,7 +44,7 @@ public class ParticleRotatingSmoke extends TransparentParticle {
   }
 
   @Override
-  protected int getLightColor(float partialTick) {
+  protected int getLightCoords(float partialTick) {
     int skylight = 15;
     int blocklight = 15;
     return skylight << 20 | blocklight << 4;

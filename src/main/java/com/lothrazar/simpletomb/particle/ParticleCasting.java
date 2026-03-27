@@ -28,9 +28,9 @@ public class ParticleCasting extends SingleQuadParticle {
     this.goUp = addY < 1d;
     this.caster = caster;
     this.predic = predic;
-    this.quadSize = level.random.nextFloat() * 0.1f + 0.15f;
-    this.angle = angle + WorldHelper.getRandom(level.random, -0.25, 0.25);
-    this.roll = level.random.nextFloat() * (float) (2d * Math.PI);
+    this.quadSize = level.getRandom().nextFloat() * 0.1f + 0.15f;
+    this.angle = angle + WorldHelper.getRandom(level.getRandom(), -0.25, 0.25);
+    this.roll = level.getRandom().nextFloat() * (float) (2d * Math.PI);
     float[] color = WorldHelper.getRGBColor3F(14937088);
     this.colorR = color[0];
     this.colorG = color[1];
@@ -44,8 +44,8 @@ public class ParticleCasting extends SingleQuadParticle {
     this.xo = this.x = caster.getX() + this.radius * Math.cos(2 * Math.PI * (this.angle));
     this.yo = this.y = this.y + (this.goUp ? 0.02d : -0.02d);
     this.zo = this.z = caster.getZ() + this.radius * Math.sin(2 * Math.PI * (this.angle));
-    setColor(clampColor(this.colorR + (WorldHelper.getRandom(level.random, -20f, 20f) / 255f)), clampColor(this.colorG - (WorldHelper.getRandom(level.random, -20f, 20f) / 255f)),
-        clampColor(this.colorB + (WorldHelper.getRandom(level.random, -20f, 20f) / 255f)));
+    setColor(clampColor(this.colorR + (WorldHelper.getRandom(level.getRandom(), -20f, 20f) / 255f)), clampColor(this.colorG - (WorldHelper.getRandom(level.getRandom(), -20f, 20f) / 255f)),
+        clampColor(this.colorB + (WorldHelper.getRandom(level.getRandom(), -20f, 20f) / 255f)));
     this.oRoll = this.roll;
     this.roll += (float) ROT_INCR;
   }
@@ -67,7 +67,7 @@ public class ParticleCasting extends SingleQuadParticle {
   }
 
   @Override
-  protected int getLightColor(float partialTick) {
+  protected int getLightCoords(float partialTick) {
     int skylight = 5;
     int blocklight = 15;
     return skylight << 20 | blocklight << 4;

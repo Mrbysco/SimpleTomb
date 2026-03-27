@@ -46,7 +46,7 @@ public class ParticleGhost extends TransparentParticle {
   }
 
   @Override
-  protected int getLightColor(float partialTick) {
+  protected int getLightCoords(float partialTick) {
     int skylight = 15;
     int blocklight = 15;
     return skylight << 20 | blocklight << 4;

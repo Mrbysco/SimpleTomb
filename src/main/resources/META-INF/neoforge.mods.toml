@@ -39,12 +39,12 @@ The key is not required to reclaim your tomb, but it will help you find the tomb
 [[dependencies.simpletomb]]
 modId="neoforge"
 type="required"
-versionRange="[21.11.0-beta,)"
+versionRange="[26.1.0.0-alpha,)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.simpletomb]]
 modId="minecraft"
 type="required"
-versionRange="[1.21.11,1.22)"
+versionRange="[26.1,)"
 ordering="NONE"
 side="BOTH"

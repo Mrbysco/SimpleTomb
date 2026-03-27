@@ -368,9 +368,9 @@ public class PlayerTombEvents {
         TombRegistry.GRAVE_CROSS.get(),
         TombRegistry.TOMBSTONE.get(),
     };
-    BlockState state = graves[serverLevel.random.nextInt(graves.length)].defaultBlockState();
+    BlockState state = graves[serverLevel.getRandom().nextInt(graves.length)].defaultBlockState();
     state = state.setValue(BlockTomb.FACING, facing);
-    state = state.setValue(BlockTomb.MODEL_TEXTURE, serverLevel.random.nextInt(2));
+    state = state.setValue(BlockTomb.MODEL_TEXTURE, serverLevel.getRandom().nextInt(2));
     return state;
   }
 
