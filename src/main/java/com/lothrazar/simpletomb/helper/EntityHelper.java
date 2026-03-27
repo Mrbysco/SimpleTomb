@@ -1,8 +1,10 @@
 package com.lothrazar.simpletomb.helper;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
@@ -10,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.neoforged.fml.ModList;
+import net.minecraft.world.item.equipment.Equippable;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +20,7 @@ public class EntityHelper {
 
   public static final String NBT_PLAYER_PERSISTED = "PlayerPersisted";
 
-  public static boolean autoEquip(ItemStack stack, Player player) {
+  public static boolean autoEquip(ItemStack stack, ServerPlayer player) {
     if (stack.isEmpty()) {
       return false;
     }
@@ -30,18 +32,14 @@ public class EntityHelper {
       return false;
     }
     if (stack.getMaxStackSize() == 1) {
-      if (ModList.get().isLoaded("curios")) {
-        if (CuriosHelper.autoEquip(stack, player)) {
-          return true;
-        }
-      }
       if (player.getOffhandItem().isEmpty()) {
         if (stack.is(Items.SHIELD)) {
           player.setItemSlot(EquipmentSlot.OFFHAND, stack.copy());
           return true;
         }
       }
-      EquipmentSlot slot = stack.getEquipmentSlot();
+      Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+      EquipmentSlot slot = equippable != null ? equippable.slot() : null;
       boolean isElytra = false;
       if (slot == null) {
         if (!stack.is(Items.ELYTRA)) {
@@ -63,7 +61,10 @@ public class EntityHelper {
         return false;
       }
       if (isElytra) {
-        player.getInventory().add(stackInSlot.copy());
+        ItemStack displaced = stackInSlot.copy();
+        if (!player.getInventory().add(displaced)) {
+          player.spawnAtLocation(player.level(), displaced);
+        }
         player.getInventory().setItem(armorSlotIndex, stack.copy());
         return true;
       }

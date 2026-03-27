@@ -9,6 +9,7 @@ import com.lothrazar.simpletomb.data.DeathHelper;
 import com.lothrazar.simpletomb.data.MessageType;
 import com.lothrazar.simpletomb.data.PartEnum;
 import com.lothrazar.simpletomb.data.PlayerTombRecords;
+import com.lothrazar.simpletomb.helper.CuriosHelper;
 import com.lothrazar.simpletomb.helper.EntityHelper;
 import com.lothrazar.simpletomb.helper.WorldHelper;
 import net.minecraft.ChatFormatting;
@@ -35,6 +36,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDestroyBlockEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
@@ -102,7 +104,7 @@ public class PlayerTombEvents {
   @SubscribeEvent(priority = EventPriority.LOWEST)
   public void onPlayerRespawn(PlayerRespawnEvent event) {
     Player player = event.getEntity();
-    if (EntityHelper.isValidPlayerMP(player) && !player.isSpectator()) {
+    if (EntityHelper.isValidPlayerMP(player) && !player.isSpectator() && player instanceof ServerPlayer serverPlayer) {
       CompoundTag persistentTag = EntityHelper.getPersistentTag(player);
       ListTag stackList = persistentTag.getListOrEmpty(TB_SOULBOUND_STACKS);
       for (int i = 0; i < stackList.size(); ++i) {
@@ -111,7 +113,7 @@ public class PlayerTombEvents {
             stackList.getCompoundOrEmpty(i)
         ).result().orElse(ItemStack.EMPTY);
         if (!stack.isEmpty() && !player.getInventory().add(stack)) {
-          player.spawnAtLocation(stack);
+          serverPlayer.spawnAtLocation(serverPlayer.level(), stack);
         }
       }
       persistentTag.remove(TB_SOULBOUND_STACKS);
@@ -141,6 +143,9 @@ public class PlayerTombEvents {
     }
     if (!event.isCanceled()) {
       Player player = (Player) event.getEntity();
+      if (ModList.get().isLoaded("curios")) {
+        CuriosHelper.tagEquippedCurios(player);
+      }
       Inventory inventory = player.getInventory();
       PartEnum part = ConfigTomb.KEEPPARTS.get();
       switch (part) {
@@ -182,6 +187,10 @@ public class PlayerTombEvents {
     }
     if (!EntityHelper.isValidPlayer(event.getEntity()) ||
         WorldHelper.isRuleKeepInventory((Player) event.getEntity())) {
+      return;
+    }
+    if (event.isCanceled()) {
+      keepingMap.remove(event.getEntity().getUUID());
       return;
     }
     Player player = (Player) event.getEntity();
