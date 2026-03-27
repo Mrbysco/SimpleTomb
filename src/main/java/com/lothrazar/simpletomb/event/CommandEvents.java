@@ -159,6 +159,7 @@ public class CommandEvents {
           for (ItemStack d : drops) {
             ResourceHandlerUtil.insertStacking(handler, ItemResource.of(d), d.count(), tx);
           }
+          tx.commit();
         }
       }
       ctx.getSource().sendSuccess(() -> Component.literal("Restored tomb with at [")
