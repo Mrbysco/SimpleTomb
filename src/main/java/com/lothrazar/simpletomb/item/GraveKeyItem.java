@@ -83,7 +83,9 @@ public class GraveKeyItem extends Item {
       if (player.getItemInHand(context.getHand()).getItem() == TombRegistry.GRAVE_KEY.get()) {
         BlockState state = context.getLevel().getBlockState(pos);
         if (state.getBlock() instanceof BlockTomb) {
-          BlockTomb.activatePlayerGrave(context.getLevel(), pos, state, player);
+          if (!context.getLevel().isClientSide()) {
+            BlockTomb.activatePlayerGrave(context.getLevel(), pos, state, player);
+          }
           return InteractionResult.SUCCESS;
         }
       }

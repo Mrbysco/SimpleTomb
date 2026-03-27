@@ -12,7 +12,6 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.util.FakePlayer;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
 public class EntityHelper {
@@ -64,7 +63,7 @@ public class EntityHelper {
         return false;
       }
       if (isElytra) {
-        ItemHandlerHelper.giveItemToPlayer(player, stackInSlot.copy());
+        player.getInventory().add(stackInSlot.copy());
         player.getInventory().setItem(armorSlotIndex, stack.copy());
         return true;
       }

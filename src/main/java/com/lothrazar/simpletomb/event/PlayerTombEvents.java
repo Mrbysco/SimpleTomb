@@ -41,8 +41,10 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent.Detonate;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.apache.logging.log4j.Level;
 
 import java.io.File;
@@ -109,7 +111,7 @@ public class PlayerTombEvents {
             stackList.getCompoundOrEmpty(i)
         ).result().orElse(ItemStack.EMPTY);
         if (!stack.isEmpty()) {
-          ItemHandlerHelper.giveItemToPlayer(player, stack);
+          player.getInventory().add(stack);
         }
       }
       persistentTag.remove(TB_SOULBOUND_STACKS);
@@ -313,7 +315,7 @@ public class PlayerTombEvents {
       return;
     }
     grave.initTombstoneOwner(player);
-    IItemHandler itemHandler = grave.getHandler(null);
+    ItemStacksResourceHandler handler = grave.getHandler(null);
     if (ConfigTomb.KEYGIVEN.get()) {
       ItemStack key = new ItemStack(TombRegistry.GRAVE_KEY.get());
       TombRegistry.GRAVE_KEY.get().setTombPos(key, spawnPos);
@@ -321,15 +323,20 @@ public class PlayerTombEvents {
       keys.add(key);
     }
     this.storeSoulboundsOnBody(player, keys);
-    for (ItemEntity entityItem : event.getDrops()) {
-      if (!entityItem.getItem().isEmpty()) {
-        ItemHandlerHelper.insertItemStacked(itemHandler, entityItem.getItem().copy(), false);
+    try (var tx = Transaction.openRoot()) {
+      for (ItemEntity entityItem : event.getDrops()) {
+        if (!entityItem.getItem().isEmpty()) {
+          ItemStack stack = entityItem.getItem().copy();
+          ResourceHandlerUtil.insertStacking(handler, ItemResource.of(stack), stack.getCount(), tx);
+          entityItem.setItem(ItemStack.EMPTY);
+        }
+      }
+      for (ItemEntity entityItem : itemsPickedUpFromGround) {
+        ItemStack stack = entityItem.getItem();
+        ResourceHandlerUtil.insertStacking(handler, ItemResource.of(stack), stack.getCount(), tx);
         entityItem.setItem(ItemStack.EMPTY);
       }
-    }
-    for (ItemEntity entityItem : itemsPickedUpFromGround) {
-      ItemHandlerHelper.insertItemStacked(itemHandler, entityItem.getItem(), false);
-      entityItem.setItem(ItemStack.EMPTY);
+      tx.commit();
     }
     level.sendBlockUpdated(spawnPos.pos(), state, state, 2);
     DeathHelper.INSTANCE.putLastGrave(player, spawnPos);
