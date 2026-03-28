@@ -1,7 +1,9 @@
 package com.lothrazar.simpletomb.block;
 
+import com.lothrazar.simpletomb.TombComponents;
 import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.data.MessageType;
+import com.lothrazar.simpletomb.helper.CuriosHelper;
 import com.lothrazar.simpletomb.helper.EntityHelper;
 import com.lothrazar.simpletomb.helper.WorldHelper;
 import com.lothrazar.simpletomb.proxy.ClientUtils;
@@ -16,11 +18,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
@@ -46,13 +50,30 @@ public class BlockEntityTomb extends BlockEntity {
   private boolean onlyOwnersAccess = true;
 
   public void giveInventory(@Nullable Player player) {
-    if (!this.level.isClientSide() && player != null && !(player instanceof FakePlayer)) {
+    if (!this.level.isClientSide() && player instanceof ServerPlayer serverPlayer && !(player instanceof FakePlayer)) {
       try (var tx = Transaction.openRoot()) {
+        if (ModList.get().isLoaded("curios")) {
+          for (int i = handler.size() - 1; i >= 0; --i) {
+            ItemResource resource = handler.getResource(i);
+            int amount = handler.getAmountAsInt(i);
+            ItemStack stack = resource.toStack(amount);
+            TombComponents.CurioSlot curioSlot = stack.get(TombComponents.CURIO_SLOT.get());
+            if (curioSlot != null) {
+              handler.extract(resource, amount, tx);
+              stack.remove(TombComponents.CURIO_SLOT.get());
+              if (!CuriosHelper.restoreToSlot(serverPlayer, curioSlot.slotType(), curioSlot.slotIndex(), stack)) {
+                if (!serverPlayer.getInventory().add(stack)) {
+                  serverPlayer.spawnAtLocation(serverPlayer.level(), stack);
+                }
+              }
+            }
+          }
+        }
         for (int i = handler.size() - 1; i >= 0; --i) {
           ItemResource resource = handler.getResource(i);
           int amount = handler.getAmountAsInt(i);
           ItemStack stack = resource.toStack(amount);
-          if (EntityHelper.autoEquip(stack, player)) {
+          if (EntityHelper.autoEquip(stack, serverPlayer)) {
             handler.extract(resource, amount, tx);
           }
         }
@@ -62,7 +83,10 @@ public class BlockEntityTomb extends BlockEntity {
           int amount = handler.getAmountAsInt(ix);
           ItemStack stack = resource.toStack(amount);
           if (!stack.isEmpty()) {
-            player.getInventory().add(stack.copy());
+            ItemStack copy = stack.copy();
+            if (!serverPlayer.getInventory().add(copy)) {
+              serverPlayer.spawnAtLocation(serverPlayer.level(), copy);
+            }
             handler.extract(resource, amount, tx);
           }
         });

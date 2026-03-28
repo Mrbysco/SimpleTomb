@@ -49,8 +49,8 @@ public class GraveKeyItem extends Item {
         canTp = ConfigTomb.TPCREATIVE.get();
       }
       else {
-        canTp = (ConfigTomb.TPSURVIVAL.get() > 0 &&
-            distance < ConfigTomb.TPSURVIVAL.get()) || ConfigTomb.TPSURVIVAL.get() == -1;
+        canTp = ConfigTomb.TPSURVIVAL.get() == 0 ||
+            (ConfigTomb.TPSURVIVAL.get() > 0 && distance < ConfigTomb.TPSURVIVAL.get());
       }
       if (canTp) {
         if (count <= 1) {
@@ -83,7 +83,9 @@ public class GraveKeyItem extends Item {
       if (player.getItemInHand(context.getHand()).getItem() == TombRegistry.GRAVE_KEY.get()) {
         BlockState state = context.getLevel().getBlockState(pos);
         if (state.getBlock() instanceof BlockTomb) {
-          BlockTomb.activatePlayerGrave(context.getLevel(), pos, state, player);
+          if (!context.getLevel().isClientSide()) {
+            BlockTomb.activatePlayerGrave(context.getLevel(), pos, state, player);
+          }
           return InteractionResult.SUCCESS;
         }
       }

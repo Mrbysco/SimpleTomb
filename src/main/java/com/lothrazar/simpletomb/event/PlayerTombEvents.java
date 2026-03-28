@@ -9,6 +9,7 @@ import com.lothrazar.simpletomb.data.DeathHelper;
 import com.lothrazar.simpletomb.data.MessageType;
 import com.lothrazar.simpletomb.data.PartEnum;
 import com.lothrazar.simpletomb.data.PlayerTombRecords;
+import com.lothrazar.simpletomb.helper.CuriosHelper;
 import com.lothrazar.simpletomb.helper.EntityHelper;
 import com.lothrazar.simpletomb.helper.WorldHelper;
 import net.minecraft.ChatFormatting;
@@ -35,14 +36,17 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDestroyBlockEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent.Detonate;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.apache.logging.log4j.Level;
 
 import java.io.File;
@@ -100,7 +104,7 @@ public class PlayerTombEvents {
   @SubscribeEvent(priority = EventPriority.LOWEST)
   public void onPlayerRespawn(PlayerRespawnEvent event) {
     Player player = event.getEntity();
-    if (EntityHelper.isValidPlayerMP(player) && !player.isSpectator()) {
+    if (EntityHelper.isValidPlayerMP(player) && !player.isSpectator() && player instanceof ServerPlayer serverPlayer) {
       CompoundTag persistentTag = EntityHelper.getPersistentTag(player);
       ListTag stackList = persistentTag.getListOrEmpty(TB_SOULBOUND_STACKS);
       for (int i = 0; i < stackList.size(); ++i) {
@@ -108,8 +112,8 @@ public class PlayerTombEvents {
             player.registryAccess().createSerializationContext(NbtOps.INSTANCE),
             stackList.getCompoundOrEmpty(i)
         ).result().orElse(ItemStack.EMPTY);
-        if (!stack.isEmpty()) {
-          ItemHandlerHelper.giveItemToPlayer(player, stack);
+        if (!stack.isEmpty() && !player.getInventory().add(stack)) {
+          serverPlayer.spawnAtLocation(serverPlayer.level(), stack);
         }
       }
       persistentTag.remove(TB_SOULBOUND_STACKS);
@@ -139,6 +143,9 @@ public class PlayerTombEvents {
     }
     if (!event.isCanceled()) {
       Player player = (Player) event.getEntity();
+      if (ModList.get().isLoaded("curios")) {
+        CuriosHelper.tagEquippedCurios(player);
+      }
       Inventory inventory = player.getInventory();
       PartEnum part = ConfigTomb.KEEPPARTS.get();
       switch (part) {
@@ -180,6 +187,10 @@ public class PlayerTombEvents {
     }
     if (!EntityHelper.isValidPlayer(event.getEntity()) ||
         WorldHelper.isRuleKeepInventory((Player) event.getEntity())) {
+      return;
+    }
+    if (event.isCanceled()) {
+      keepingMap.remove(event.getEntity().getUUID());
       return;
     }
     Player player = (Player) event.getEntity();
@@ -313,7 +324,7 @@ public class PlayerTombEvents {
       return;
     }
     grave.initTombstoneOwner(player);
-    IItemHandler itemHandler = grave.getHandler(null);
+    ItemStacksResourceHandler handler = grave.getHandler(null);
     if (ConfigTomb.KEYGIVEN.get()) {
       ItemStack key = new ItemStack(TombRegistry.GRAVE_KEY.get());
       TombRegistry.GRAVE_KEY.get().setTombPos(key, spawnPos);
@@ -321,15 +332,20 @@ public class PlayerTombEvents {
       keys.add(key);
     }
     this.storeSoulboundsOnBody(player, keys);
-    for (ItemEntity entityItem : event.getDrops()) {
-      if (!entityItem.getItem().isEmpty()) {
-        ItemHandlerHelper.insertItemStacked(itemHandler, entityItem.getItem().copy(), false);
+    try (var tx = Transaction.openRoot()) {
+      for (ItemEntity entityItem : event.getDrops()) {
+        if (!entityItem.getItem().isEmpty()) {
+          ItemStack stack = entityItem.getItem().copy();
+          ResourceHandlerUtil.insertStacking(handler, ItemResource.of(stack), stack.getCount(), tx);
+          entityItem.setItem(ItemStack.EMPTY);
+        }
+      }
+      for (ItemEntity entityItem : itemsPickedUpFromGround) {
+        ItemStack stack = entityItem.getItem();
+        ResourceHandlerUtil.insertStacking(handler, ItemResource.of(stack), stack.getCount(), tx);
         entityItem.setItem(ItemStack.EMPTY);
       }
-    }
-    for (ItemEntity entityItem : itemsPickedUpFromGround) {
-      ItemHandlerHelper.insertItemStacked(itemHandler, entityItem.getItem(), false);
-      entityItem.setItem(ItemStack.EMPTY);
+      tx.commit();
     }
     level.sendBlockUpdated(spawnPos.pos(), state, state, 2);
     DeathHelper.INSTANCE.putLastGrave(player, spawnPos);
