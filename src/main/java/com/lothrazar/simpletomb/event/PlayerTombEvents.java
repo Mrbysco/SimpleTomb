@@ -342,6 +342,9 @@ public class PlayerTombEvents {
       }
       for (ItemEntity entityItem : itemsPickedUpFromGround) {
         ItemStack stack = entityItem.getItem();
+        if (stack.isEmpty()) {
+          continue;
+        }
         ResourceHandlerUtil.insertStacking(handler, ItemResource.of(stack), stack.getCount(), tx);
         entityItem.setItem(ItemStack.EMPTY);
       }
