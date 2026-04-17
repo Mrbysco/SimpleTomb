@@ -1,7 +1,9 @@
 package com.lothrazar.simpletomb.test;
 
 import com.lothrazar.simpletomb.ModTomb;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestInstance;
 import net.minecraft.gametest.framework.TestData;
@@ -10,6 +12,8 @@ import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterGameTestsEvent;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Consumer;
 
@@ -17,6 +21,12 @@ import java.util.function.Consumer;
 public class SimpleTombGameTests {
 
   private static final Identifier EMPTY_STRUCTURE = Identifier.fromNamespaceAndPath(ModTomb.MODID, "empty");
+
+  public static final DeferredRegister<MapCodec<? extends GameTestInstance>> TEST_INSTANCE_TYPES =
+      DeferredRegister.create(Registries.TEST_INSTANCE_TYPE, ModTomb.MODID);
+
+  public static final DeferredHolder<MapCodec<? extends GameTestInstance>, MapCodec<DirectGameTestInstance>> DIRECT_TYPE =
+      TEST_INSTANCE_TYPES.register("direct", () -> DirectGameTestInstance.CODEC);
 
   @SubscribeEvent
   public static void registerTests(RegisterGameTestsEvent event) {
@@ -51,14 +61,13 @@ public class SimpleTombGameTests {
     reg(event, name, function, environment, timeoutTicks, true);
   }
 
-  @SuppressWarnings("unchecked")
   private static void reg(RegisterGameTestsEvent event, String name,
       Consumer<GameTestHelper> function,
       Holder<TestEnvironmentDefinition<?>> environment,
       int timeoutTicks, boolean required) {
     TestData<Holder<TestEnvironmentDefinition<?>>> testData = new TestData<>(
         environment, EMPTY_STRUCTURE, timeoutTicks, 0, required);
-    GameTestInstance instance = new DirectGameTestInstance(name, function, (TestData) testData);
+    GameTestInstance instance = new DirectGameTestInstance(name, function, testData);
     event.registerTest(Identifier.fromNamespaceAndPath(ModTomb.MODID, name), instance);
   }
 }

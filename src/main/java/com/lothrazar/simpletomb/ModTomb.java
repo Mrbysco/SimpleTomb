@@ -4,6 +4,7 @@ import com.lothrazar.simpletomb.event.ClientEvents;
 import com.lothrazar.simpletomb.event.CommandEvents;
 import com.lothrazar.simpletomb.event.PlayerTombEvents;
 import com.lothrazar.simpletomb.proxy.ClientUtils;
+import com.lothrazar.simpletomb.test.SimpleTombGameTests;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -31,6 +32,7 @@ public class ModTomb {
     TombRegistry.ITEMS.register(eventBus);
     TombRegistry.BLOCK_ENTITIES.register(eventBus);
     TombRegistry.PARTICLE_TYPES.register(eventBus);
+    SimpleTombGameTests.TEST_INSTANCE_TYPES.register(eventBus);
     NeoForge.EVENT_BUS.register(new CommandEvents());
     if (dist.isClient()) {
       container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
