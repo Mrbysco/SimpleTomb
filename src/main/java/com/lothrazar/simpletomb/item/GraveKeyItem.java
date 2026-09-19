@@ -26,6 +26,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.entity.player.Inventory;
+import org.lwjgl.sdl.SDLKeycode;
 
 import java.util.function.Consumer;
 
@@ -107,7 +108,7 @@ public class GraveKeyItem extends Item {
   @Override
   public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag tooltipFlag) {
     Level level = context.level();
-    if (level != null && level.isClientSide() && com.mojang.blaze3d.platform.InputConstants.isKeyDown(net.minecraft.client.Minecraft.getInstance().getWindow(), org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_SHIFT)) {
+    if (level != null && level.isClientSide() && com.mojang.blaze3d.platform.InputConstants.isKeyDown(SDLKeycode.SDLK_LSHIFT)) {
       GlobalPos location = this.getTombPos(stack);
       BlockPos pos = ClientUtils.getPlayerPos();
       if (pos != null && !location.equals(DeathHelper.ORIGIN)) {

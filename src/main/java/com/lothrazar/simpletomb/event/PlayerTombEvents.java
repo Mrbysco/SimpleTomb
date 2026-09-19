@@ -304,7 +304,7 @@ public class PlayerTombEvents {
       MessageType.MESSAGE_NO_LOOT_FOR_GRAVE.sendSpecialMessage(player);
       return;
     }
-    BlockPos initPos = WorldHelper.getInitialPos(level, new BlockPos(player.blockPosition()));
+    BlockPos initPos = WorldHelper.getInitialPos(level, player.blockPosition());
     GlobalPos spawnPos = WorldHelper.findGraveSpawn(player, initPos);
     if (spawnPos == null || spawnPos.pos() == null) {
       MessageType.MESSAGE_NO_PLACE_FOR_GRAVE.sendSpecialMessage(player);

@@ -123,25 +123,25 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb, TombRend
     }
     poseStack.pushPose();
     poseStack.translate(modX, modY, modZ);
-    poseStack.mulPose(Axis.XP.rotationDegrees(180f));
+    poseStack.rotateDegrees(Axis.XP,180f);
     if (isCross) {
       switch (facing) {
         case SOUTH:
-          poseStack.mulPose(Axis.XP.rotationDegrees(-90f));
+          poseStack.rotateDegrees(Axis.XP,-90f);
         break;
         case WEST:
-          poseStack.mulPose(Axis.ZP.rotationDegrees(90f));
+          poseStack.rotateDegrees(Axis.ZP,90f);
         break;
         case EAST:
-          poseStack.mulPose(Axis.ZP.rotationDegrees(-90f));
+          poseStack.rotateDegrees(Axis.ZP,-90f);
         break;
         case NORTH:
         default:
-          poseStack.mulPose(Axis.XP.rotationDegrees(90f));
+          poseStack.rotateDegrees(Axis.XP,90f);
         break;
       }
     }
-    poseStack.mulPose(Axis.YP.rotationDegrees(-90f * rotationIndex));
+    poseStack.rotateDegrees(Axis.YP,-90f * rotationIndex);
 
     Font fontRender = this.font;
     int textColor = 0xFFFFFFFF;

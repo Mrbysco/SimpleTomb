@@ -5,8 +5,6 @@ import com.lothrazar.simpletomb.TombRegistry;
 import com.lothrazar.simpletomb.data.DeathHelper;
 import com.lothrazar.simpletomb.data.MessageType;
 import com.lothrazar.simpletomb.helper.EntityHelper;
-import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
@@ -37,13 +35,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import java.util.function.BiConsumer;
 
 public class BlockTomb extends BaseEntityBlock {
-  public static final MapCodec<BlockTomb> CODEC = RecordCodecBuilder.mapCodec(
-          instance -> instance.group(
-                          propertiesCodec(),
-                          ModelTomb.CODEC.fieldOf("model").forGetter(BlockTomb::getGraveType)
-          )
-          .apply(instance, BlockTomb::new)
-  );
 
   public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
   public static final IntegerProperty MODEL_TEXTURE = IntegerProperty.create("model_texture", 0, 1);
@@ -59,11 +50,6 @@ public class BlockTomb extends BaseEntityBlock {
   @Override
   public RenderShape getRenderShape(BlockState state) {
     return RenderShape.MODEL;
-  }
-
-  @Override
-  public MapCodec<BlockTomb> codec() {
-    return CODEC;
   }
 
   @Override
