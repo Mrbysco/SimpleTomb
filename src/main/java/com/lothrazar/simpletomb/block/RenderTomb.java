@@ -5,15 +5,16 @@ import com.lothrazar.simpletomb.helper.WorldHelper;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -141,41 +142,51 @@ public class RenderTomb implements BlockEntityRenderer<BlockEntityTomb, TombRend
       }
     }
     poseStack.mulPose(Axis.YP.rotationDegrees(-90f * rotationIndex));
-    MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+
     Font fontRender = this.font;
     int textColor = 0xFFFFFFFF;
-    showString(ChatFormatting.BOLD + MessageType.MESSAGE_RIP.getTranslation(), poseStack, bufferSource, fontRender, 0,
+    showString(ChatFormatting.BOLD + MessageType.MESSAGE_RIP.getTranslation(), poseStack, collector, fontRender, 0,
         textColor, 0.007f, light);
-    showString(ChatFormatting.BOLD + state.ownerName, poseStack, bufferSource, fontRender, 11, textColor, 0.005f, light);
+    showString(ChatFormatting.BOLD + state.ownerName, poseStack, collector, fontRender, 11, textColor, 0.005f, light);
     float scaleForDate = 0.004f;
     long days = state.timer / 24000;
     String dateString = MessageType.MESSAGE_DAY.getTranslation(days);
-    showString(ChatFormatting.BOLD + dateString, poseStack, bufferSource, fontRender, 20, textColor, scaleForDate, light);
+    showString(ChatFormatting.BOLD + dateString, poseStack, collector, fontRender, 20, textColor, scaleForDate, light);
     Date date = new Date(state.deathDate);
     String fdateString = new SimpleDateFormat(DATE_FORMAT).format(date);
     String timeString = new SimpleDateFormat(TIME_FORMAT).format(date);
-    showString(ChatFormatting.BOLD + fdateString, poseStack, bufferSource, fontRender, 36, textColor, scaleForDate, light);
-    showString(ChatFormatting.BOLD + timeString, poseStack, bufferSource, fontRender, 46, textColor, scaleForDate, light);
-    bufferSource.endBatch();
+    showString(ChatFormatting.BOLD + fdateString, poseStack, collector, fontRender, 36, textColor, scaleForDate, light);
+    showString(ChatFormatting.BOLD + timeString, poseStack, collector, fontRender, 46, textColor, scaleForDate, light);
     poseStack.popPose();
   }
 
-  private void showString(String content, PoseStack poseStack, MultiBufferSource bufferSource, Font font, int posY, int color, float scale, int light) {
+  private void showString(String content, PoseStack poseStack, SubmitNodeCollector nodeCollector, Font font, int posY, int color, float scale, int light) {
     poseStack.pushPose();
     poseStack.scale(scale, scale, scale);
-    font.drawInBatch(content, (float) -font.width(content) / 2, posY - 30, color, false, poseStack.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, light);
+    Component text = Component.literal(content);
+    nodeCollector.submitText(
+            poseStack,
+            (float) -font.width(content) / 2, posY - 30,
+            text.getVisualOrderText(),
+            false,
+            Font.DisplayMode.NORMAL,
+            light,
+            ARGB.opaque(0),
+            0,
+            0);
     poseStack.popPose();
   }
 
   @Override
   public AABB getRenderBoundingBox(BlockEntityTomb blockEntity) {
     double renderExtension = 1.0D;
+    BlockPos pos = blockEntity.getBlockPos();
     return new AABB(
-        blockEntity.getBlockPos().getX() - renderExtension,
-        blockEntity.getBlockPos().getY() - renderExtension,
-        blockEntity.getBlockPos().getZ() - renderExtension,
-        blockEntity.getBlockPos().getX() + 1 + renderExtension,
-        blockEntity.getBlockPos().getY() + 1 + renderExtension,
-        blockEntity.getBlockPos().getZ() + 1 + renderExtension);
+        pos.getX() - renderExtension,
+        pos.getY() - renderExtension,
+        pos.getZ() - renderExtension,
+        pos.getX() + 1 + renderExtension,
+        pos.getY() + 1 + renderExtension,
+        pos.getZ() + 1 + renderExtension);
   }
 }
