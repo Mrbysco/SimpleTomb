@@ -74,8 +74,8 @@ repositories {
 }
 
 dependencies {
-//    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
-//    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    runtimeOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 }
 
 jar {

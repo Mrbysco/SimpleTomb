@@ -8,6 +8,7 @@ import com.lothrazar.simpletomb.data.MessageType;
 import com.lothrazar.simpletomb.helper.NBTHelper;
 import com.lothrazar.simpletomb.helper.WorldHelper;
 import com.lothrazar.simpletomb.proxy.ClientUtils;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -15,6 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -25,8 +27,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.entity.player.Inventory;
-import org.lwjgl.sdl.SDLKeycode;
 
 import java.util.function.Consumer;
 
@@ -108,7 +108,7 @@ public class GraveKeyItem extends Item {
   @Override
   public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay tooltipDisplay, Consumer<Component> tooltipAdder, TooltipFlag tooltipFlag) {
     Level level = context.level();
-    if (level != null && level.isClientSide() && com.mojang.blaze3d.platform.InputConstants.isKeyDown(SDLKeycode.SDLK_LSHIFT)) {
+    if (level != null && level.isClientSide() && com.mojang.blaze3d.platform.InputConstants.isKeyDown(InputConstants.KEY_LSHIFT)) {
       GlobalPos location = this.getTombPos(stack);
       BlockPos pos = ClientUtils.getPlayerPos();
       if (pos != null && !location.equals(DeathHelper.ORIGIN)) {
