@@ -24,7 +24,7 @@ public class ModTomb {
   public static final Logger LOGGER = LogManager.getLogger();
 
   public ModTomb(IEventBus eventBus, Dist dist, ModContainer container) {
-    container.registerConfig(ModConfig.Type.COMMON, ConfigTomb.CONFIG, MODID + ".toml");
+    container.registerConfig(ModConfig.Type.LOCAL, ConfigTomb.CONFIG, MODID + ".toml");
     eventBus.addListener(this::setup);
     TombComponents.COMPONENT_TYPE.register(eventBus);
     TombRegistry.BLOCKS.register(eventBus);
